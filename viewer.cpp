@@ -1,11 +1,13 @@
 #pragma leco app
 
 import casein;
+import jojo;
+import jute;
 import ovo;
 import siaudio;
 import silog;
+import sitime;
 import voo;
-import yoyo;
 
 static constexpr const auto window_height = 800;
 static constexpr const auto window_width = window_height * 9 / 16;
@@ -29,6 +31,15 @@ static void audio_filler(float * data, unsigned samples) {
   }
 }
 
+static int count_chars(jute::view txt) {
+  int count {};
+  for (auto c : txt) {
+    c |= 0x20;
+    if (c >= 'a' && c <= 'z') count++;
+  }
+  return count;
+}
+
 struct init : public voo::casein_thread {
   init() {
     casein::window_size = { window_width, window_height };
@@ -37,6 +48,13 @@ struct init : public voo::casein_thread {
   }
 
   void run() {
+    auto txt = jojo::read_cstr("out/script.txt");
+    auto chars = count_chars(txt);
+    auto tpc = 1000.0 * audio_time / chars;
+    silog::log(silog::info, "Number of chars: %d, millis per char: %f", chars, tpc);
+
+    sitime::stopwatch timer {};
+
     main_loop("panine", [&](auto & dq, auto & sw) {
       ots_loop(dq, sw, [&](auto cb) {
       });
