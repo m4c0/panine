@@ -52,6 +52,7 @@ static auto tokenise(jute::view & rest) {
     r = r.subview(1).after;
   }
 
+  if (r.size()) silog::log(silog::info, "Taking word: [%s]", l.cstr().begin());
   rest = r;
   return l;
 }
@@ -60,7 +61,6 @@ struct init : public voo::casein_thread {
   init() {
     casein::window_size = { window_width, window_height };
     siaudio::filler(audio_filler);
-    siaudio::rate(audio_rate);
   }
 
   void run() {
@@ -72,12 +72,21 @@ struct init : public voo::casein_thread {
     sitime::stopwatch timer {};
 
     jute::view rest { txt };
-    while (rest.size()) {
-      silog::trace("word", tokenise(rest));
-    }
+    auto word = tokenise(rest);
+    bool started {};
 
     main_loop("panine", [&](auto & dq, auto & sw) {
       ots_loop(dq, sw, [&](auto cb) {
+        if (!started) {
+          siaudio::rate(audio_rate);
+          timer = {};
+          started = true;
+        }
+        auto time = timer.millis() / tpc;
+        if (time > word.size()) {
+          word = tokenise(rest);
+          timer = {};
+        }
       });
     });
   }
