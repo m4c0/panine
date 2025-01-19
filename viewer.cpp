@@ -12,6 +12,7 @@ static constexpr const auto window_width = window_height * 9 / 16;
 static constexpr const auto audio_rate = 48000; // TODO: read from file
 
 static ovo::file audio = ovo::open_file("out/audio.ogg");
+static double audio_time = ovo::time_total(audio, 0);
 static int audio_bs {};
 
 static void audio_filler(float * data, unsigned samples) {
