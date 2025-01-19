@@ -21,14 +21,15 @@ static int audio_bs {};
 
 static void audio_filler(float * data, unsigned samples) {
   float ** pcm {};
-  auto r = ovo::read_float(audio_file, &pcm, samples, &audio_bs);
-  if (r <= 0) {
-    silog::log(silog::info, "Audio ended with code %ld", r);
-    siaudio::rate(0);
-    return;
-  }
-  for (auto i = 0; i < r; i++) {
-    data[i] = pcm[0][i];
+  while (samples > 0) {
+    auto r = ovo::read_float(audio_file, &pcm, samples, &audio_bs);
+    if (r <= 0) {
+      silog::log(silog::info, "Audio ended with code %ld", r);
+      siaudio::rate(0);
+      return;
+    }
+    for (int i = 0; i < r; i++) *data++ = pcm[0][i];
+    samples -= r;
   }
 }
 
