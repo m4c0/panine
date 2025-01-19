@@ -12,16 +12,24 @@ static constexpr const auto window_width = window_height * 9 / 16;
 static constexpr const auto audio_rate = 48000; // TODO: read from file
 
 static auto audio = yoyo::file_reader::open("out/audio.ogg")
+      .fmap(yoyo::slurp)
       .take([](auto msg) {
           silog::die("failed to open audio: %s", msg.cstr().begin());
       });
-static ovo::decoder audio_dec { &audio };
+static ovo::file audio_file = ovo::open_callbacks(audio);
+static int audio_bs {};
 
 static void audio_filler(float * data, unsigned samples) {
-  while (audio_dec.preload()) {}
-  audio_dec.fill(data, samples);
-  for (auto i = 0; i < samples; i++)
-  silog::trace("here", data[i]);
+  float ** pcm {};
+  auto r = ovo::read_float(audio_file, &pcm, samples, &audio_bs);
+  if (r <= 0) {
+    silog::log(silog::info, "Audio ended with code %ld", r);
+    siaudio::rate(0);
+    return;
+  }
+  for (auto i = 0; i < r; i++) {
+    data[i] = pcm[0][i];
+  }
 }
 
 struct init : public voo::casein_thread {
