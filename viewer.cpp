@@ -40,6 +40,22 @@ static int count_chars(jute::view txt) {
   return count;
 }
 
+static auto tokenise(jute::view & rest) {
+  int c;
+  for (c = 0; c < rest.size(); c++) {
+    if (rest[c] == ' ' || rest[c] == '\n') break;
+  }
+
+  auto [l, r] = rest.subview(c);
+  while (r.size()) {
+    if (r[0] != ' ' && r[0] != '\n') break;
+    r = r.subview(1).after;
+  }
+
+  rest = r;
+  return l;
+}
+
 struct init : public voo::casein_thread {
   init() {
     casein::window_size = { window_width, window_height };
@@ -54,6 +70,11 @@ struct init : public voo::casein_thread {
     silog::log(silog::info, "Number of chars: %d, millis per char: %f", chars, tpc);
 
     sitime::stopwatch timer {};
+
+    jute::view rest { txt };
+    while (rest.size()) {
+      silog::trace("word", tokenise(rest));
+    }
 
     main_loop("panine", [&](auto & dq, auto & sw) {
       ots_loop(dq, sw, [&](auto cb) {
