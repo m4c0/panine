@@ -11,18 +11,13 @@ static constexpr const auto window_height = 800;
 static constexpr const auto window_width = window_height * 9 / 16;
 static constexpr const auto audio_rate = 48000; // TODO: read from file
 
-static auto audio = yoyo::file_reader::open("out/audio.ogg")
-      .fmap(yoyo::slurp)
-      .take([](auto msg) {
-          silog::die("failed to open audio: %s", msg.cstr().begin());
-      });
-static ovo::file audio_file = ovo::open_callbacks(audio);
+static ovo::file audio = ovo::open_file("out/audio.ogg");
 static int audio_bs {};
 
 static void audio_filler(float * data, unsigned samples) {
   float ** pcm {};
   while (samples > 0) {
-    auto r = ovo::read_float(audio_file, &pcm, samples, &audio_bs);
+    auto r = ovo::read_float(audio, &pcm, samples, &audio_bs);
     if (r <= 0) {
       silog::log(silog::info, "Audio ended with code %ld", r);
       siaudio::rate(0);
