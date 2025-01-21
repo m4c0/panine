@@ -1,3 +1,5 @@
+#pragma leco add_shader "main.vert"
+#pragma leco add_shader "main.frag"
 #pragma leco app
 
 import audio;
@@ -19,6 +21,10 @@ struct init : public voo::casein_thread {
     bool started {};
 
     main_loop("panine", [&](auto & dq, auto & sw) {
+      vee::pipeline_layout pl = vee::create_pipeline_layout({ *dsl }, { vee::vert_frag_push_constant_range<upc>() });
+
+      voo::one_quad_render oqr { "main", &dq, *pl };
+
       extent_loop(dq.queue(), sw, [&] {
         if (!started) {
           audio::start();
@@ -31,6 +37,7 @@ struct init : public voo::casein_thread {
             .command_buffer = *pcb,
             .clear_colours { vee::clear_colour({}) },
           });
+          oqr.run(*pcb, sw.extent());
         });
       });
     });
