@@ -61,8 +61,13 @@ struct init : public voo::casein_thread {
 
       vee::unmap_memory(*v_mem);
 
+      auto dsl_s = vee::create_descriptor_set_layout({ vee::dsl_fragment_storage() });
+      auto dpool_s = vee::create_descriptor_pool(1, { vee::storage_buffer() });
+      auto dset = vee::allocate_descriptor_set(*dpool_s, *dsl_s);
+      vee::update_descriptor_set_with_storage(dset, 0, *v_buf);
+
       vee::pipeline_layout pl = vee::create_pipeline_layout(
-          { *dsl },
+          { *dsl, *dsl_s },
           { vee::vert_frag_push_constant_range<upc>() });
 
       voo::one_quad_render oqr { "main", &dq, *pl };
@@ -88,6 +93,7 @@ struct init : public voo::casein_thread {
           oqr.run(*pcb, sw.extent(), [&] {
             vee::cmd_push_vert_frag_constants(*pcb, *pl, &pc);
             vee::cmd_bind_descriptor_set(*pcb, *pl, 0, scr.descriptor_set());
+            vee::cmd_bind_descriptor_set(*pcb, *pl, 1, dset);
           });
         });
       });
