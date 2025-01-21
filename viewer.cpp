@@ -18,7 +18,9 @@ static constexpr const auto font_h = 64;
 static wtf::library g_library{};
 static wtf::face g_face = g_library.new_face("out/font.ttf");
 
-struct upc {};
+struct upc {
+  float aspect;
+};
 
 struct init : public voo::casein_thread {
   init() {
@@ -53,6 +55,10 @@ struct init : public voo::casein_thread {
           started = true;
         }
 
+        upc pc {
+          .aspect = sw.aspect(),
+        };
+
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           scr.setup_copy(*pcb);
 
@@ -61,6 +67,7 @@ struct init : public voo::casein_thread {
             .clear_colours { vee::clear_colour({}) },
           });
           oqr.run(*pcb, sw.extent(), [&] {
+            vee::cmd_push_vert_frag_constants(*pcb, *pl, &pc);
             vee::cmd_bind_descriptor_set(*pcb, *pl, 0, scr.descriptor_set());
           });
         });
