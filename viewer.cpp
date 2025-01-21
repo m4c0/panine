@@ -4,6 +4,7 @@
 
 import audio;
 import casein;
+import dotz;
 import sitime;
 import vee;
 import voo;
@@ -21,6 +22,11 @@ static wtf::face g_face = g_library.new_face("out/font.ttf");
 struct upc {
   float aspect;
 };
+struct chr {
+  dotz::vec2 pos;
+  dotz::vec2 size;
+  dotz::vec4 uv;
+};
 
 struct init : public voo::casein_thread {
   init() {
@@ -36,11 +42,24 @@ struct init : public voo::casein_thread {
       auto dsl = vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() });
       auto dpool = vee::create_descriptor_pool(1, { vee::combined_image_sampler() });
       vtw::scriber scr { dq.physical_device(), vee::allocate_descriptor_set(*dpool, *dsl) };
+      scr.bounds({ 1024, 1024 });
+
+      vee::buffer v_buf = vee::create_vertex_buffer(sizeof(chr) * 16);
+      vee::device_memory v_mem = vee::create_host_buffer_memory(dq.physical_device(), *v_buf);
+      vee::bind_buffer_memory(*v_buf, *v_mem);
+      auto vs = static_cast<chr *>(vee::map_memory(*v_mem));
 
       auto s = g_face.shape_en("Hello");
       scr.pen({ 0, font_h });
       scr.draw(s, [&](auto pen, const auto & glyph) {
+        *vs++ = chr {
+          .pos  = pen + glyph.d,
+          .size = glyph.size,
+          .uv   = glyph.uv
+        };
       });
+
+      vee::unmap_memory(*v_mem);
 
       vee::pipeline_layout pl = vee::create_pipeline_layout(
           { *dsl },
