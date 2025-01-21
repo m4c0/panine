@@ -71,6 +71,7 @@ struct init : public voo::casein_thread {
           { vee::vert_frag_push_constant_range<upc>() });
 
       voo::one_quad_render oqr { "main", &dq, *pl };
+      bool copied = false;
 
       extent_loop(dq.queue(), sw, [&] {
         if (!started) {
@@ -84,7 +85,10 @@ struct init : public voo::casein_thread {
         };
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          scr.setup_copy(*pcb);
+          if (!copied) {
+            scr.setup_copy(*pcb);
+            copied = true;
+          }
 
           auto scb = sw.cmd_render_pass({
             .command_buffer = *pcb,
