@@ -3,6 +3,7 @@
 import audio;
 import casein;
 import sitime;
+import vee;
 import voo;
 
 static constexpr const auto window_height = 800;
@@ -18,12 +19,19 @@ struct init : public voo::casein_thread {
     bool started {};
 
     main_loop("panine", [&](auto & dq, auto & sw) {
-      ots_loop(dq, sw, [&](auto cb) {
+      extent_loop(dq.queue(), sw, [&] {
         if (!started) {
           audio::start();
           timer = {};
           started = true;
         }
+
+        sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
+          auto scb = sw.cmd_render_pass({
+            .command_buffer = *pcb,
+            .clear_colours { vee::clear_colour({}) },
+          });
+        });
       });
     });
   }
