@@ -14,7 +14,8 @@ import what_the_font;
 static constexpr const auto window_height = 800;
 static constexpr const auto window_width = window_height * 9 / 16;
 
-static constexpr const auto font_h = 64;
+static constexpr const auto font_h = 196;
+static constexpr const auto max_chars = 16;
 
 static wtf::library g_library{};
 static wtf::face g_face = g_library.new_face("out/font.ttf");
@@ -44,7 +45,7 @@ struct init : public voo::casein_thread {
       vtw::scriber scr { dq.physical_device(), vee::allocate_descriptor_set(*dpool, *dsl) };
       scr.bounds({ 1024, 1024 });
 
-      vee::buffer v_buf = vee::create_vertex_buffer(sizeof(chr) * 16);
+      vee::buffer v_buf = vee::create_vertex_buffer(sizeof(chr) * max_chars);
       vee::device_memory v_mem = vee::create_host_buffer_memory(dq.physical_device(), *v_buf);
       vee::bind_buffer_memory(*v_buf, *v_mem);
       auto vs = static_cast<chr *>(vee::map_memory(*v_mem));

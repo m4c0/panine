@@ -25,7 +25,7 @@ void main() {
   vec4 c = vec4(0, 0, 0, 1);
 
   vec2 pp = p * 1024.0;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 16; i++) {
     vec2 n = clamp((pp - cs[i].pos) / cs[i].size, 0, 1);
     vec2 uv = cs[i].uv.xy + n * cs[i].uv.zw;
     vec4 cc = texture(atlas, uv);
