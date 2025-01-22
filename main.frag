@@ -26,10 +26,14 @@ void main() {
 
   vec2 pp = p * 1024.0;
   for (int i = 0; i < 16; i++) {
-    vec2 n = clamp((pp - cs[i].pos) / cs[i].size, 0, 1);
+    vec2 pc = (pp - cs[i].pos) / cs[i].size;
+    vec2 dc = abs(pc - 0.5) - 0.5;
+    float dd = 1.0 - step(0, max(dc.x, dc.y));
+
+    vec2 n = clamp(pc, 0, 1);
     vec2 uv = cs[i].uv.xy + n * cs[i].uv.zw;
     vec4 cc = texture(atlas, uv);
-    c = mix(c, cc, cc.a);
+    c = mix(c, cc, cc.a * dd);
   }
 
   colour = c;
