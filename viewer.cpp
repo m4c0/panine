@@ -14,7 +14,7 @@ import what_the_font;
 static constexpr const auto window_height = 800;
 static constexpr const auto window_width = window_height * 9 / 16;
 
-static constexpr const auto font_h = 196;
+static constexpr const auto font_h = 128;
 static constexpr const auto max_chars = 16;
 
 static wtf::library g_library{};
@@ -50,8 +50,9 @@ struct init : public voo::casein_thread {
       vee::bind_buffer_memory(*v_buf, *v_mem);
       auto vs = static_cast<chr *>(vee::map_memory(*v_mem));
 
-      auto s = g_face.shape_en("Hello");
-      scr.pen({ 0, font_h });
+      auto s = g_face.shape_en("Engineering");
+      auto [tw, th] = s.bounding_box();
+      scr.pen({ (1024 - tw) / 2, (1024 - th) / 2 });
       scr.draw(s, [&](auto pen, const auto & glyph) {
         *vs++ = chr {
           .pos  = pen + glyph.d,
