@@ -55,8 +55,7 @@ struct init : public vapp {
       auto vs = static_cast<chr *>(vee::map_memory(*v_mem));
 
       auto s = g_face.shape_en("Engineering");
-      auto [tw, th] = s.bounding_box();
-      scr.pen({ (1024 - tw) / 2, (1024 - th) / 2 });
+      scr.pen((-s.bounding_box() + 1024) / 2);
       scr.draw(s, [&](auto pen, const auto & glyph) {
         *vs++ = chr {
           .pos  = pen + glyph.d,
