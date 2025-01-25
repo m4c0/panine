@@ -5,6 +5,7 @@
 import audio;
 import casein;
 import dotz;
+import sdf_texture;
 import sitime;
 import vapp;
 import vee;
@@ -45,6 +46,8 @@ struct init : public vapp {
       auto dpool = vee::create_descriptor_pool(1, { vee::combined_image_sampler() });
       vtw::scriber scr { dq.physical_device(), vee::allocate_descriptor_set(*dpool, *dsl) };
       scr.bounds({ 1024, 1024 });
+
+      sdf_texture sdf { dq, { 1024, 1024 } };
 
       vee::buffer v_buf = vee::create_vertex_buffer(sizeof(chr) * max_chars);
       vee::device_memory v_mem = vee::create_host_buffer_memory(dq.physical_device(), *v_buf);

@@ -46,18 +46,23 @@ export class sdf_texture {
 
   vee::fence m_f = vee::create_fence_reset();
 
+  voo::host_buffer m_host;
   local_buffer m_buf0;
   local_buffer m_buf1;
 
   vee::command_pool m_cpool;
   vee::command_buffer m_cb;
 
+  vee::extent m_ext;
+
 public:
   sdf_texture(const voo::device_and_queue & dq, vee::extent sz)
-    : m_buf0 { dq, buf_sz(sz) }
+    : m_host { dq, buf_sz(sz) }
+    , m_buf0 { dq, buf_sz(sz) }
     , m_buf1 { dq, buf_sz(sz) }
     , m_cpool { vee::create_command_pool(dq.queue_family()) }
-    , m_cb { vee::allocate_primary_command_buffer(*m_cpool) } {
+    , m_cb { vee::allocate_primary_command_buffer(*m_cpool) }
+    , m_ext { sz } {
     vee::update_descriptor_set_with_storage(m_ds0, 0, m_buf0.buffer());
     vee::update_descriptor_set_with_storage(m_ds0, 1, m_buf1.buffer());
 
@@ -65,21 +70,13 @@ public:
     vee::update_descriptor_set_with_storage(m_ds1, 1, m_buf0.buffer());
   }
 
-  void xxx();
+  auto map_input() { return voo::mapmem { m_host.memory() }; }
 };
 
 module :private;
 
+/*
 void sdf_texture::xxx() try {
-  {
-    voo::mapmem mm { b1.memory() };
-    auto p = static_cast<float *>(*mm);
-
-    for (auto i = 0; i < map_sz; i++) {
-      p[i] = 256.0 - (*img.data)[i * 4];
-    }
-  }
-
   bool out_to_1 = true;
   {
     voo::cmd_buf_one_time_submit::build(cb, [&](auto & cb) {
@@ -117,4 +114,4 @@ void sdf_texture::xxx() try {
 } catch (...) {
   return 1;
 }
-
+*/
