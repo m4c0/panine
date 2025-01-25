@@ -49,27 +49,26 @@ struct init : public vapp {
 
       sdf_texture sdf { dq, { 1024, 1024 } };
 
-      vee::buffer v_buf = vee::create_vertex_buffer(sizeof(chr) * max_chars);
-      vee::device_memory v_mem = vee::create_host_buffer_memory(dq.physical_device(), *v_buf);
-      vee::bind_buffer_memory(*v_buf, *v_mem);
-      auto vs = static_cast<chr *>(vee::map_memory(*v_mem));
+      auto chrs = voo::host_buffer { dq, sizeof(chr) * max_chars };
+      {
+        voo::mapmem mem { chrs.memory() };
+        auto vs = static_cast<chr *>(*mem);
 
-      auto s = g_face.shape_en("Engineering");
-      scr.pen((-s.bounding_box() + 1024) / 2);
-      scr.draw(s, [&](auto pen, const auto & glyph) {
-        *vs++ = chr {
-          .pos  = pen + glyph.d,
-          .size = glyph.size,
-          .uv   = glyph.uv
-        };
-      });
-
-      vee::unmap_memory(*v_mem);
+        auto s = g_face.shape_en("Engineering");
+        scr.pen((-s.bounding_box() + 1024) / 2);
+        scr.draw(s, [&](auto pen, const auto & glyph) {
+          *vs++ = chr {
+            .pos  = pen + glyph.d,
+            .size = glyph.size,
+            .uv   = glyph.uv
+          };
+        });
+      }
 
       auto dsl_s = vee::create_descriptor_set_layout({ vee::dsl_fragment_storage() });
       auto dpool_s = vee::create_descriptor_pool(1, { vee::storage_buffer() });
       auto dset = vee::allocate_descriptor_set(*dpool_s, *dsl_s);
-      vee::update_descriptor_set_with_storage(dset, 0, *v_buf);
+      vee::update_descriptor_set_with_storage(dset, 0, chrs.buffer());
 
       vee::pipeline_layout pl = vee::create_pipeline_layout(
           { *dsl, *dsl_s },
