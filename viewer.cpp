@@ -5,6 +5,7 @@
 import audio;
 import casein;
 import dotz;
+import ofs;
 import sdf_texture;
 import sitime;
 import vapp;
@@ -42,6 +43,8 @@ struct init : public vapp {
     bool started {};
 
     main_loop("panine", [&](auto & dq, auto & sw) {
+      ofs o { dq, { 1024, 1024 } };
+
       auto dsl = vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() });
       auto dpool = vee::create_descriptor_pool(1, { vee::combined_image_sampler() });
       vtw::scriber scr { dq.physical_device(), vee::allocate_descriptor_set(*dpool, *dsl) };
