@@ -6,6 +6,7 @@ import audio;
 import casein;
 import dotz;
 import sitime;
+import vapp;
 import vee;
 import voo;
 import vtw;
@@ -29,7 +30,7 @@ struct chr {
   dotz::vec4 uv;
 };
 
-struct init : public voo::casein_thread {
+struct init : public vapp {
   init() {
     casein::window_size = { window_width, window_height };
     g_face.set_char_size(font_h);
