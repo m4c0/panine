@@ -6,39 +6,71 @@ import stubby;
 import vee;
 import voo;
 
-void xxx() try {
-  auto img = stbi::load("image.png").take([](auto msg) { die(msg); });
+class local_buffer {
+  vee::buffer m_buf;
+  vee::device_memory m_mem;
 
-  voo::device_and_queue dq { "gpu" };
+public:
+  local_buffer() = default;
+  local_buffer(vee::physical_device pd, unsigned sz) {
+    m_buf = vee::create_transfer_buffer(sz);
+    m_mem = vee::create_local_buffer_memory(pd, *m_buf);
+    vee::bind_buffer_memory(*m_buf, *m_mem);
+  }
+  local_buffer(const voo::device_and_queue &dq, unsigned sz)
+      : local_buffer{dq.physical_device(), sz} {}
 
-  const unsigned map_sz = img.width * img.height;
-  const unsigned buf_sz = map_sz * sizeof(float);
-  voo::host_buffer b1 { dq, buf_sz };
-  voo::host_buffer b2 { dq, buf_sz };
+  [[nodiscard]] auto buffer() const { return *m_buf; }
+  [[nodiscard]] auto memory() const { return *m_mem; }
+};
 
-  auto dsl = vee::create_descriptor_set_layout({
+static unsigned buf_sz(vee::extent sz) {
+  return sz.width * sz.height * sizeof(float);
+}
+
+export class sdf_texture {
+  vee::descriptor_set_layout m_dsl = vee::create_descriptor_set_layout({
     vee::dsl_compute_storage(),
     vee::dsl_compute_storage(),
   });
-  auto pl = vee::create_pipeline_layout({ *dsl });
+  vee::pipeline_layout m_pl = vee::create_pipeline_layout({ *m_dsl });
+  
+  vee::c_pipeline m_ppl = vee::create_compute_pipeline(
+      *m_pl,
+      *vee::create_shader_module_from_resource("sdf_texture.comp.spv"),
+      "main");
 
-  auto dpool = vee::create_descriptor_pool(2, { vee::storage_buffer(4) });
+  vee::descriptor_pool m_dpool = vee::create_descriptor_pool(2, { vee::storage_buffer(4) });
+  vee::descriptor_set m_ds0 = vee::allocate_descriptor_set(*m_dpool, *m_dsl);
+  vee::descriptor_set m_ds1 = vee::allocate_descriptor_set(*m_dpool, *m_dsl);
 
-  auto ds_f = vee::allocate_descriptor_set(*dpool, *dsl);
-  vee::update_descriptor_set_with_storage(ds_f, 0, b1.buffer());
-  vee::update_descriptor_set_with_storage(ds_f, 1, b2.buffer());
+  vee::fence m_f = vee::create_fence_reset();
 
-  auto ds_b = vee::allocate_descriptor_set(*dpool, *dsl);
-  vee::update_descriptor_set_with_storage(ds_b, 0, b2.buffer());
-  vee::update_descriptor_set_with_storage(ds_b, 1, b1.buffer());
+  local_buffer m_buf0;
+  local_buffer m_buf1;
 
-  auto kern = vee::create_shader_module_from_resource("gpu.comp.spv");
-  auto p = vee::create_compute_pipeline(*pl, *kern, "main");
+  vee::command_pool m_cpool;
+  vee::command_buffer m_cb;
 
-  auto cp = vee::create_command_pool(dq.queue_family());
-  auto cb = vee::allocate_primary_command_buffer(*cp);
-  auto f = vee::create_fence_reset();
+public:
+  sdf_texture(const voo::device_and_queue & dq, vee::extent sz)
+    : m_buf0 { dq, buf_sz(sz) }
+    , m_buf1 { dq, buf_sz(sz) }
+    , m_cpool { vee::create_command_pool(dq.queue_family()) }
+    , m_cb { vee::allocate_primary_command_buffer(*m_cpool) } {
+    vee::update_descriptor_set_with_storage(m_ds0, 0, m_buf0.buffer());
+    vee::update_descriptor_set_with_storage(m_ds0, 1, m_buf1.buffer());
 
+    vee::update_descriptor_set_with_storage(m_ds1, 0, m_buf1.buffer());
+    vee::update_descriptor_set_with_storage(m_ds1, 1, m_buf0.buffer());
+  }
+
+  void xxx();
+};
+
+module :private;
+
+void sdf_texture::xxx() try {
   {
     voo::mapmem mm { b1.memory() };
     auto p = static_cast<float *>(*mm);
