@@ -16,6 +16,8 @@ import vtw;
 static constexpr const auto window_height = 800;
 static constexpr const auto window_width = window_height * 9 / 16;
 
+static constexpr const auto font_h = 128;
+
 struct upc {
   float aspect;
 };
@@ -60,7 +62,7 @@ struct init : public vapp {
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           if (!copied) {
-            s.shape(*pcb, 1024, "Engineering");
+            s.shape(*pcb, 1024, font_h, "Engineering");
             copied = true;
           }
 
