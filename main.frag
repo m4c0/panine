@@ -1,4 +1,6 @@
 #version 450
+#extension GL_GOOGLE_include_directive : require
+#include "../glslinc/inigo.glsl"
 
 layout(push_constant) uniform upc {
   float aspect;
@@ -15,6 +17,9 @@ void main() {
   p.y /= aspect;
   p = clamp(p * 0.5 + 0.5, 0, 1);
 
-  vec4 cc = texture(text, p);
-  colour = vec4(cc);
+  float d = texture(text, p).r;
+  
+  vec3 c = inigo_debug(d);
+
+  colour = vec4(c, 1);
 }
