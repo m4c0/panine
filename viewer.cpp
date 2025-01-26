@@ -4,7 +4,6 @@
 
 import audio;
 import casein;
-import ofs;
 import scriber;
 import sdf_texture;
 import sitime;
@@ -28,7 +27,6 @@ struct init : public vapp {
     bool started {};
 
     main_loop("panine", [&](auto & dq, auto & sw) {
-      ofs o { dq, { 1024, 1024 } };
       scriber s { dq, { 1024, 1024 } };
 
       sdf_texture sdf { dq, { 1024, 1024 } };
@@ -52,7 +50,7 @@ struct init : public vapp {
             .command_buffer = *pcb,
             .clear_colours { vee::clear_colour({}) },
           });
-          s.render(*pcb, sw.extent());
+          //s.render(*pcb, sw.extent());
         });
       });
     });
