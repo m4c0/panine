@@ -1,3 +1,5 @@
+#pragma leco add_shader "scriber.frag"
+#pragma leco add_shader "scriber.vert"
 export module scriber;
 import chars;
 import jute;
@@ -33,7 +35,7 @@ public:
     , m_pl { vee::create_pipeline_layout({
         m_scr.descriptor_set_layout(), m_chr.dsl()
       }) }
-    , m_oqr { "main", &dq, *m_pl }
+    , m_oqr { "scriber", &dq, *m_pl }
     , m_ofs { dq, ext }
     , m_ext { ext } {
     m_scr.bounds({ ext.width, ext.height });
