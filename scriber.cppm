@@ -20,6 +20,9 @@ export class scriber {
   vee::descriptor_pool m_dpool;
   vtw::scriber m_scr;
 
+  void setup_copy(vee::command_buffer cb) { m_scr.setup_copy(cb); }
+  void shape(int scr_w, jute::view txt);
+
 public:
   scriber(const voo::device_and_queue & dq, dotz::vec2 ext);
 
@@ -27,9 +30,10 @@ public:
   [[nodiscard]] auto dsl() const { return *m_dsl; }
   [[nodiscard]] auto dset() const { return m_scr.descriptor_set(); }
 
-  void setup_copy(vee::command_buffer cb) { m_scr.setup_copy(cb); }
-
-  void shape(int scr_w, jute::view txt);
+  void shape(vee::command_buffer cb, int scr_w, jute::view txt) {
+    shape(scr_w, txt);
+    setup_copy(cb);
+  }
 };
 
 module : private;

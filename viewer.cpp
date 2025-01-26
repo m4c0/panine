@@ -60,8 +60,7 @@ struct init : public vapp {
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           if (!copied) {
-            s.shape(1024, "Engineering");
-            s.setup_copy(*pcb);
+            s.shape(*pcb, 1024, "Engineering");
             copied = true;
           }
 
