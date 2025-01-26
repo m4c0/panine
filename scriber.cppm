@@ -13,8 +13,8 @@ export class scriber {
   chars m_chr;
   vtw::scriber m_scr;
   vee::pipeline_layout m_pl;
-  voo::one_quad_render m_oqr;
   ofs m_ofs;
+  voo::one_quad_render m_oqr;
   vee::extent m_ext;
 
   void setup_copy(vee::command_buffer cb) { m_scr.setup_copy(cb); }
@@ -35,8 +35,8 @@ public:
     , m_pl { vee::create_pipeline_layout({
         m_scr.descriptor_set_layout(), m_chr.dsl()
       }) }
-    , m_oqr { "scriber", &dq, *m_pl }
     , m_ofs { dq, ext }
+    , m_oqr { "scriber", dq.physical_device(), m_ofs.render_pass(), *m_pl }
     , m_ext { ext } {
     m_scr.bounds({ ext.width, ext.height });
   }
