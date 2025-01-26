@@ -16,18 +16,20 @@ export class scriber {
   static constexpr const auto max_chars = 16;
 
   voo::host_buffer m_chrs;
-  vee::descriptor_set_layout m_dsl;
-  vee::descriptor_pool m_dpool;
   vtw::scriber m_scr;
 
   void setup_copy(vee::command_buffer cb) { m_scr.setup_copy(cb); }
   void shape(int scr_w, jute::view txt);
 
 public:
-  scriber(const voo::device_and_queue & dq, dotz::vec2 ext);
+  scriber(const voo::device_and_queue & dq, dotz::vec2 ext)
+    : m_chrs { dq, sizeof(chr) * max_chars }
+    , m_scr { dq.physical_device() } {
+    m_scr.bounds(ext);
+  }
 
   [[nodiscard]] auto cbuf() const { return m_chrs.buffer(); }
-  [[nodiscard]] auto dsl() const { return *m_dsl; }
+  [[nodiscard]] auto dsl() const { return m_scr.descriptor_set_layout(); }
   [[nodiscard]] auto dset() const { return m_scr.descriptor_set(); }
 
   void shape(vee::command_buffer cb, int scr_w, jute::view txt) {
@@ -37,14 +39,6 @@ public:
 };
 
 module : private;
-
-scriber::scriber(const voo::device_and_queue & dq, dotz::vec2 ext)
-  : m_chrs { dq, sizeof(chr) * max_chars }
-  , m_dsl { vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }) }
-  , m_dpool { vee::create_descriptor_pool(1, { vee::combined_image_sampler() }) }
-  , m_scr { dq.physical_device(), vee::allocate_descriptor_set(*m_dpool, *m_dsl) } {
-  m_scr.bounds(ext);
-}
 
 void scriber::shape(int scr_w, jute::view txt) {
   static constexpr const auto font_h = 128;
