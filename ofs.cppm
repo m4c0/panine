@@ -12,7 +12,7 @@ export class ofs {
 public:
   ofs(const voo::device_and_queue & dq, vee::extent ext)
     : m_cbuf { dq.physical_device(), ext, vee::image_format_r8 }
-    , m_rp { vee::create_render_pass({ { vee::create_colour_attachment() } }) }
+    , m_rp { vee::create_render_pass({}) }
     , m_fb { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
