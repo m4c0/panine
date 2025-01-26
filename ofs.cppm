@@ -11,8 +11,10 @@ export class ofs {
 
 public:
   ofs(const voo::device_and_queue & dq, vee::extent ext)
-    : m_cbuf { dq.physical_device(), ext, vee::image_format_srgba }
-    , m_rp { vee::create_depthless_render_pass({{ vee::create_colour_attachment(vee::image_format_srgba) }}) }
+    : m_cbuf { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
+    , m_rp { vee::create_depthless_render_pass({{
+        vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_shader_read_only_optimal)
+      }}) }
     , m_fb { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
