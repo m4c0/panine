@@ -1,9 +1,5 @@
 #version 450
 
-layout(push_constant) uniform upc {
-  float aspect;
-};
-
 layout(set = 0, binding = 0) uniform sampler2D atlas;
 
 struct s_chr {
@@ -19,7 +15,6 @@ layout(location = 0) out vec4 colour;
 
 void main() {
   vec2 p = pos;
-  p.y /= aspect;
   p = clamp(p * 0.5 + 0.5, 0, 1);
 
   vec4 c = vec4(0, 0, 0, 1);

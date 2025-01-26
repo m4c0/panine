@@ -18,10 +18,6 @@ static constexpr const auto window_width = window_height * 9 / 16;
 
 static constexpr const auto font_h = 128;
 
-struct upc {
-  float aspect;
-};
-
 struct init : public vapp {
   init() {
     casein::window_size = { window_width, window_height };
@@ -37,11 +33,6 @@ struct init : public vapp {
 
       sdf_texture sdf { dq, { 1024, 1024 } };
 
-      vee::pipeline_layout pl = vee::create_pipeline_layout(
-          { s.atlas_dsl(), s.chars_dsl() },
-          { vee::vert_frag_push_constant_range<upc>() });
-
-      voo::one_quad_render oqr { "main", &dq, *pl };
       bool copied = false;
 
       extent_loop(dq.queue(), sw, [&] {
@@ -50,10 +41,6 @@ struct init : public vapp {
           timer = {};
           started = true;
         }
-
-        upc pc {
-          .aspect = sw.aspect(),
-        };
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           if (!copied) {
@@ -65,11 +52,7 @@ struct init : public vapp {
             .command_buffer = *pcb,
             .clear_colours { vee::clear_colour({}) },
           });
-          oqr.run(*pcb, sw.extent(), [&] {
-            vee::cmd_push_vert_frag_constants(*pcb, *pl, &pc);
-            vee::cmd_bind_descriptor_set(*pcb, *pl, 0, s.atlas_dset());
-            vee::cmd_bind_descriptor_set(*pcb, *pl, 1, s.chars_dset());
-          });
+          s.render(*pcb, sw.extent());
         });
       });
     });

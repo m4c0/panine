@@ -10,6 +10,8 @@ import what_the_font;
 export class scriber {
   chars m_chr;
   vtw::scriber m_scr;
+  vee::pipeline_layout m_pl;
+  voo::one_quad_render m_oqr;
 
   void setup_copy(vee::command_buffer cb) { m_scr.setup_copy(cb); }
   void shape(int scr_w, unsigned font_h, jute::view txt);
@@ -17,19 +19,24 @@ export class scriber {
 public:
   scriber(const voo::device_and_queue & dq, dotz::vec2 ext)
     : m_chr { dq }
-    , m_scr { dq.physical_device() } {
+    , m_scr { dq.physical_device() }
+    , m_pl { vee::create_pipeline_layout({
+        m_scr.descriptor_set_layout(), m_chr.dsl()
+      }) }
+    , m_oqr { "main", &dq, *m_pl } {
     m_scr.bounds(ext);
   }
-
-  [[nodiscard]] auto atlas_dsl() const { return m_scr.descriptor_set_layout(); }
-  [[nodiscard]] auto chars_dsl() const { return m_chr.dsl(); }
-
-  [[nodiscard]] auto atlas_dset() const { return m_scr.descriptor_set(); }
-  [[nodiscard]] auto chars_dset() const { return m_chr.dset(); }
 
   void shape(vee::command_buffer cb, int scr_w, unsigned font_h, jute::view txt) {
     shape(scr_w, font_h, txt);
     setup_copy(cb);
+  }
+
+  void render(vee::command_buffer cb, vee::extent ext) {
+    m_oqr.run(cb, ext, [&] {
+      vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_scr.descriptor_set());
+      vee::cmd_bind_descriptor_set(cb, *m_pl, 1, m_chr.dset());
+    });
   }
 };
 
