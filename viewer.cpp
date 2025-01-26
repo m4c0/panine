@@ -31,6 +31,9 @@ struct init : public vapp {
 
       sdf_texture sdf { dq, { 1024, 1024 } };
 
+      auto pl = vee::create_pipeline_layout();
+      voo::one_quad_render oqr { "main", &dq, *pl };
+
       bool copied = false;
 
       extent_loop(dq.queue(), sw, [&] {
@@ -50,7 +53,7 @@ struct init : public vapp {
             .command_buffer = *pcb,
             .clear_colours { vee::clear_colour({}) },
           });
-          //s.render(*pcb, sw.extent());
+          oqr.run(*scb, sw.extent());
         });
       });
     });
