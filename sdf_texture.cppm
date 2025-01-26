@@ -13,7 +13,8 @@ class local_buffer {
 public:
   local_buffer() = default;
   local_buffer(vee::physical_device pd, unsigned sz) {
-    m_buf = vee::create_transfer_buffer(sz);
+    using bu = vee::buffer_usage;
+    m_buf = vee::create_buffer(sz, bu::storage_buffer, bu::transfer_src_buffer, bu::transfer_dst_buffer);
     m_mem = vee::create_local_buffer_memory(pd, *m_buf);
     vee::bind_buffer_memory(*m_buf, *m_mem);
   }
