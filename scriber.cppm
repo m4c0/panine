@@ -46,6 +46,8 @@ public:
     setup_copy(cb);
     render(cb);
   }
+
+  auto image_view() const { return m_ofs.image_view(); }
 };
 
 module : private;

@@ -4,7 +4,7 @@
 //   float aspect;
 // };
 // 
-// layout(set = 0, binding = 0) uniform sampler2D text;
+layout(set = 0, binding = 0) uniform sampler2D text;
 
 layout(location = 0) in vec2 pos;
 
@@ -15,7 +15,6 @@ void main() {
   // p.y /= aspect;
   p = clamp(p * 0.5 + 0.5, 0, 1);
 
-  // vec4 cc = texture(text, p);
-  // colour = vec4(cc);
-  colour = vec4(1);
+  vec4 cc = texture(text, p);
+  colour = vec4(cc);
 }

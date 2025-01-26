@@ -31,7 +31,13 @@ struct init : public vapp {
 
       sdf_texture sdf { dq, { 1024, 1024 } };
 
-      auto pl = vee::create_pipeline_layout();
+      voo::single_dset dset {
+        vee::dsl_fragment_sampler(), vee::combined_image_sampler()
+      };
+      vee::sampler smp = vee::create_sampler(vee::linear_sampler);
+      vee::update_descriptor_set(dset.descriptor_set(), 0, s.image_view(), *smp);
+
+      auto pl = vee::create_pipeline_layout({ dset.descriptor_set_layout() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
       bool copied = false;
@@ -53,7 +59,9 @@ struct init : public vapp {
             .command_buffer = *pcb,
             .clear_colours { vee::clear_colour({}) },
           });
-          oqr.run(*scb, sw.extent());
+          oqr.run(*scb, sw.extent(), [&] {
+            vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset.descriptor_set());
+          });
         });
       });
     });

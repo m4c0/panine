@@ -31,5 +31,6 @@ public:
     }};
   }
 
+  [[nodiscard]] auto image_view() const { return m_cbuf.image_view(); }
   [[nodiscard]] auto render_pass() const { return *m_rp; }
 };
