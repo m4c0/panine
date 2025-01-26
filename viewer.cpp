@@ -17,6 +17,10 @@ static constexpr const auto window_width = window_height * 9 / 16;
 
 static constexpr const auto font_h = 128;
 
+struct upc {
+  float aspect;
+};
+
 struct init : public vapp {
   init() {
     casein::window_size = { window_width, window_height };
@@ -37,7 +41,9 @@ struct init : public vapp {
       vee::sampler smp = vee::create_sampler(vee::linear_sampler);
       vee::update_descriptor_set(dset.descriptor_set(), 0, s.image_view(), *smp);
 
-      auto pl = vee::create_pipeline_layout({ dset.descriptor_set_layout() });
+      auto pl = vee::create_pipeline_layout(
+          { dset.descriptor_set_layout() },
+          { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
       bool copied = false;
@@ -48,6 +54,8 @@ struct init : public vapp {
           timer = {};
           started = true;
         }
+
+        upc pc { .aspect = sw.aspect() };
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           if (!copied) {
@@ -60,6 +68,7 @@ struct init : public vapp {
             .clear_colours { vee::clear_colour({}) },
           });
           oqr.run(*scb, sw.extent(), [&] {
+            vee::cmd_push_fragment_constants(*pcb, *pl, &pc);
             vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset.descriptor_set());
           });
         });
