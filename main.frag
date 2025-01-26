@@ -17,7 +17,7 @@ void main() {
   vec2 p = pos;
   p = clamp(p * 0.5 + 0.5, 0, 1);
 
-  vec4 c = vec4(0, 0, 0, 1);
+  float c = 0;
 
   vec2 pp = p * 1024.0;
   for (int i = 0; i < 16; i++) {
@@ -28,8 +28,9 @@ void main() {
     vec2 n = clamp(pc, 0, 1);
     vec2 uv = cs[i].uv.xy + n * cs[i].uv.zw;
     vec4 cc = texture(atlas, uv);
-    c = mix(c, cc, cc.a * dd);
+    c = mix(c, 1, cc.a * dd);
   }
 
-  colour = c;
+  c = 1 - c;
+  colour = vec4(c);
 }
