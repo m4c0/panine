@@ -3,6 +3,7 @@
 #pragma leco add_shader "ofs.vert"
 export module ofs;
 
+import dotz;
 import vee;
 import voo;
 
@@ -115,6 +116,7 @@ class pass1 {
       .dependencies {{ vee::create_colour_dependency() }},
     });
   }
+  struct upc { dotz::vec2 ext; };
 
 public:
   pass1(const voo::device_and_queue & dq, vee::image_view::type p0, vee::extent ext)
@@ -123,6 +125,8 @@ public:
     , m_dset { vee::dsl_fragment_sampler(), vee::combined_image_sampler() }
     , m_pl { vee::create_pipeline_layout({
         *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
+      }, { 
+        vee::fragment_push_constant_range<upc>(),
       }) }
     , m_rp { create_render_pass() }
     , m_gp { vee::create_graphics_pipeline({
@@ -147,6 +151,7 @@ public:
   }
 
   void render(vee::command_buffer cb) {
+    upc pc { { m_ext.width, m_ext.height } };
     voo::cmd_render_pass rp { vee::render_pass_begin {
       .command_buffer = cb,
       .render_pass = *m_rp,
@@ -156,6 +161,7 @@ public:
     }};
     vee::cmd_set_scissor(cb, m_ext);
     vee::cmd_set_viewport(cb, m_ext);
+    vee::cmd_push_fragment_constants(cb, *m_pl, &pc);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset.descriptor_set() );
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
     m_quad.run(cb, 0, 1);
