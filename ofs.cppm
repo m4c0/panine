@@ -1,3 +1,5 @@
+#pragma leco add_shader "scriber.frag"
+#pragma leco add_shader "ofs.vert"
 export module ofs;
 
 import vee;
@@ -6,11 +8,13 @@ import voo;
 export class ofs {
   voo::offscreen::colour_buffer m_cbuf;
 
+  voo::one_quad m_quad;
+
   vee::descriptor_set m_dset_scriber;
   vee::descriptor_set m_dset_chars;
   vee::pipeline_layout m_pl;
-
   vee::render_pass m_rp;
+  vee::gr_pipeline m_gp;
   vee::framebuffer m_fb;
   vee::extent m_ext;
 
@@ -27,7 +31,7 @@ export class ofs {
         })
       }},
       .dependencies {{ vee::create_colour_dependency() }},
-    });;
+    });
   }
 
 public:
@@ -36,13 +40,24 @@ public:
       vee::descriptor_set dset_chars,
       vee::extent ext)
     : m_cbuf { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
+    , m_quad { dq.physical_device() }
     , m_dset_scriber { dset_scriber }
     , m_dset_chars { dset_chars }
     , m_pl { vee::create_pipeline_layout({
         *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
-        *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
+        *vee::create_descriptor_set_layout({ vee::dsl_fragment_storage() }),
       }) }
     , m_rp { create_render_pass() }
+    , m_gp { vee::create_graphics_pipeline({
+        .pipeline_layout = *m_pl,
+        .render_pass = *m_rp,
+        .shaders {
+          voo::shader("ofs.vert.spv").pipeline_vert_stage(),
+          voo::shader("scriber.frag.spv").pipeline_frag_stage(),
+        },
+        .bindings { m_quad.vertex_input_bind() },
+        .attributes { m_quad.vertex_attribute(0) },
+      }) }
     , m_fb { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
@@ -59,8 +74,12 @@ public:
       .extent = m_ext,
       .clear_colours { vee::clear_colour({}) },
     }};
+    vee::cmd_set_scissor(cb, m_ext);
+    vee::cmd_set_viewport(cb, m_ext);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset_scriber);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 1, m_dset_chars);
+    vee::cmd_bind_gr_pipeline(cb, *m_gp);
+    m_quad.run(cb, 0, 1);
   }
 
   [[nodiscard]] auto image_view() const { return m_cbuf.image_view(); }

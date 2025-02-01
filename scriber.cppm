@@ -1,5 +1,3 @@
-#pragma leco add_shader "scriber.frag"
-#pragma leco add_shader "scriber.vert"
 export module scriber;
 import chars;
 import jute;
