@@ -5,7 +5,7 @@ export module ofs;
 import vee;
 import voo;
 
-export class ofs {
+class pass0 {
   voo::offscreen::colour_buffer m_cbuf;
 
   voo::one_quad m_quad;
@@ -35,7 +35,7 @@ export class ofs {
   }
 
 public:
-  ofs(const voo::device_and_queue & dq,
+  pass0(const voo::device_and_queue & dq,
       vee::descriptor_set dset_scriber,
       vee::descriptor_set dset_chars,
       vee::extent ext)
@@ -83,4 +83,21 @@ public:
   }
 
   [[nodiscard]] auto image_view() const { return m_cbuf.image_view(); }
+};
+
+export class ofs {
+  pass0 m_p0;
+
+public:
+  ofs(const voo::device_and_queue & dq,
+      vee::descriptor_set dset_scriber,
+      vee::descriptor_set dset_chars,
+      vee::extent ext)
+    : m_p0 { dq, dset_scriber, dset_chars, ext } {}
+
+  void render(vee::command_buffer cb) {
+    m_p0.render(cb);
+  }
+
+  [[nodiscard]] auto image_view() const { return m_p0.image_view(); }
 };
