@@ -9,12 +9,26 @@ export class ofs {
   vee::framebuffer m_fb;
   vee::extent m_ext;
 
+  static vee::render_pass create_render_pass() {
+    return vee::create_render_pass({
+      .attachments {{
+        vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_read_only_optimal),
+      }},
+      .subpasses {{
+        vee::create_subpass({
+          .colours {{
+            create_attachment_ref(0, vee::image_layout_color_attachment_optimal),
+          }},
+        })
+      }},
+      .dependencies {{ vee::create_colour_dependency() }},
+    });;
+  }
+
 public:
   ofs(const voo::device_and_queue & dq, vee::extent ext)
     : m_cbuf { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
-    , m_rp { vee::create_depthless_render_pass({{
-        vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_shader_read_only_optimal)
-      }}) }
+    , m_rp { create_render_pass() }
     , m_fb { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
