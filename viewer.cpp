@@ -5,7 +5,6 @@
 import audio;
 import casein;
 import scriber;
-import sdf_texture;
 import sitime;
 import vapp;
 import vee;
@@ -32,8 +31,6 @@ struct init : public vapp {
 
     main_loop("panine", [&](auto & dq, auto & sw) {
       scriber s { dq, { 1024, 1024 } };
-
-      sdf_texture sdf { dq, { 1024, 1024 } };
 
       voo::single_dset dset {
         vee::dsl_fragment_sampler(), vee::combined_image_sampler()
