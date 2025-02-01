@@ -1,4 +1,4 @@
-#pragma leco add_shader "scriber.frag"
+#pragma leco add_shader "ofs-pass0.frag"
 #pragma leco add_shader "ofs.vert"
 export module ofs;
 
@@ -53,7 +53,7 @@ public:
         .render_pass = *m_rp,
         .shaders {
           voo::shader("ofs.vert.spv").pipeline_vert_stage(),
-          voo::shader("scriber.frag.spv").pipeline_frag_stage(),
+          voo::shader("ofs-pass0.frag.spv").pipeline_frag_stage(),
         },
         .bindings { m_quad.vertex_input_bind() },
         .attributes { m_quad.vertex_attribute(0) },
