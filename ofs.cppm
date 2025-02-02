@@ -7,6 +7,22 @@ import dotz;
 import vee;
 import voo;
 
+static vee::render_pass create_render_pass() {
+  return vee::create_render_pass({
+    .attachments {{
+      vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_read_only_optimal),
+    }},
+    .subpasses {{
+      vee::create_subpass({
+        .colours {{
+          create_attachment_ref(0, vee::image_layout_color_attachment_optimal),
+        }},
+      })
+    }},
+    .dependencies {{ vee::create_colour_dependency() }},
+  });
+}
+
 class pass0 {
   voo::offscreen::colour_buffer m_cbuf;
 
@@ -19,22 +35,6 @@ class pass0 {
   vee::gr_pipeline m_gp;
   vee::framebuffer m_fb;
   vee::extent m_ext;
-
-  static vee::render_pass create_render_pass() {
-    return vee::create_render_pass({
-      .attachments {{
-        vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_read_only_optimal),
-      }},
-      .subpasses {{
-        vee::create_subpass({
-          .colours {{
-            create_attachment_ref(0, vee::image_layout_color_attachment_optimal),
-          }},
-        })
-      }},
-      .dependencies {{ vee::create_colour_dependency() }},
-    });
-  }
 
 public:
   pass0(const voo::device_and_queue & dq,
@@ -101,21 +101,6 @@ class pass1 {
   vee::sampler m_smp;
   vee::extent m_ext;
 
-  static vee::render_pass create_render_pass() {
-    return vee::create_render_pass({
-      .attachments {{
-        vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_read_only_optimal),
-      }},
-      .subpasses {{
-        vee::create_subpass({
-          .colours {{
-            create_attachment_ref(0, vee::image_layout_color_attachment_optimal),
-          }},
-        })
-      }},
-      .dependencies {{ vee::create_colour_dependency() }},
-    });
-  }
   struct upc { dotz::vec2 ext; };
 
 public:
