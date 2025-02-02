@@ -29,16 +29,13 @@ class pass0 {
   vee::descriptor_set m_dset_scriber;
   vee::descriptor_set m_dset_chars;
   vee::pipeline_layout m_pl;
-  vee::render_pass m_rp;
   vee::gr_pipeline m_gp;
-  vee::framebuffer m_fb;
-  vee::extent m_ext;
 
 public:
   pass0(const voo::device_and_queue & dq,
       vee::descriptor_set dset_scriber,
       vee::descriptor_set dset_chars,
-      vee::image_view::type out,
+      vee::render_pass::type rp,
       vee::extent ext)
     : m_quad { dq.physical_device() }
     , m_dset_scriber { dset_scriber }
@@ -47,35 +44,18 @@ public:
         *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
         *vee::create_descriptor_set_layout({ vee::dsl_fragment_storage() }),
       }) }
-    , m_rp { create_render_pass() }
     , m_gp { vee::create_graphics_pipeline({
         .pipeline_layout = *m_pl,
-        .render_pass = *m_rp,
+        .render_pass = rp,
         .shaders {
           voo::shader("ofs.vert.spv").pipeline_vert_stage(),
           voo::shader("ofs-pass0.frag.spv").pipeline_frag_stage(),
         },
         .bindings { m_quad.vertex_input_bind() },
         .attributes { m_quad.vertex_attribute(0) },
-      }) }
-    , m_fb { vee::create_framebuffer({
-      .physical_device = dq.physical_device(),
-      .render_pass = *m_rp,
-      .attachments = {{ out }},
-      .extent = ext,
-    }) }
-    , m_ext { ext } {}
+      }) } {}
 
   void render(vee::command_buffer cb) {
-    voo::cmd_render_pass rp { vee::render_pass_begin {
-      .command_buffer = cb,
-      .render_pass = *m_rp,
-      .framebuffer = *m_fb,
-      .extent = m_ext,
-      .clear_colours { vee::clear_colour({}) },
-    }};
-    vee::cmd_set_scissor(cb, m_ext);
-    vee::cmd_set_viewport(cb, m_ext);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset_scriber);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 1, m_dset_chars);
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
@@ -88,9 +68,7 @@ class pass1 {
 
   voo::single_dset m_dset;
   vee::pipeline_layout m_pl;
-  vee::render_pass m_rp;
   vee::gr_pipeline m_gp;
-  vee::framebuffer m_fb;
   vee::sampler m_smp;
   vee::extent m_ext;
 
@@ -99,7 +77,7 @@ class pass1 {
 public:
   pass1(const voo::device_and_queue & dq,
         vee::image_view::type in, 
-        vee::image_view::type out, 
+        vee::render_pass::type rp,
         vee::extent ext)
     : m_quad { dq.physical_device() }
     , m_dset { vee::dsl_fragment_sampler(), vee::combined_image_sampler() }
@@ -108,10 +86,9 @@ public:
       }, { 
         vee::fragment_push_constant_range<upc>(),
       }) }
-    , m_rp { create_render_pass() }
     , m_gp { vee::create_graphics_pipeline({
         .pipeline_layout = *m_pl,
-        .render_pass = *m_rp,
+        .render_pass = rp,
         .shaders {
           voo::shader("ofs.vert.spv").pipeline_vert_stage(),
           voo::shader("ofs-pass1.frag.spv").pipeline_frag_stage(),
@@ -119,12 +96,6 @@ public:
         .bindings { m_quad.vertex_input_bind() },
         .attributes { m_quad.vertex_attribute(0) },
       }) }
-    , m_fb { vee::create_framebuffer({
-      .physical_device = dq.physical_device(),
-      .render_pass = *m_rp,
-      .attachments = {{ out }},
-      .extent = ext,
-    }) }
     , m_smp { vee::create_sampler(vee::linear_sampler) }
     , m_ext { ext } {
     vee::update_descriptor_set(m_dset.descriptor_set(), 0, in, *m_smp);
@@ -132,15 +103,6 @@ public:
 
   void render(vee::command_buffer cb) {
     upc pc { { m_ext.width, m_ext.height } };
-    voo::cmd_render_pass rp { vee::render_pass_begin {
-      .command_buffer = cb,
-      .render_pass = *m_rp,
-      .framebuffer = *m_fb,
-      .extent = m_ext,
-      .clear_colours { vee::clear_colour({}) },
-    }};
-    vee::cmd_set_scissor(cb, m_ext);
-    vee::cmd_set_viewport(cb, m_ext);
     vee::cmd_push_fragment_constants(cb, *m_pl, &pc);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset.descriptor_set() );
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
@@ -149,8 +111,14 @@ public:
 };
 
 export class ofs {
+  vee::render_pass m_rp;
+  vee::extent m_ext;
+
   voo::offscreen::colour_buffer m_c0;
   voo::offscreen::colour_buffer m_c1;
+
+  vee::framebuffer m_fb0;
+  vee::framebuffer m_fb1;
 
   pass0 m_p0;
   pass1 m_p1;
@@ -160,16 +128,54 @@ public:
       vee::descriptor_set dset_scriber,
       vee::descriptor_set dset_chars,
       vee::extent ext)
-    : m_c0 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
+    : m_rp { create_render_pass() }
+    , m_ext { ext }
+    , m_c0 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
     , m_c1 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
-    , m_p0 { dq, dset_scriber, dset_chars, m_c0.image_view(), ext }
-    , m_p1 { dq, m_c0.image_view(), m_c1.image_view(), ext } {}
+    , m_fb0 { vee::create_framebuffer({
+      .physical_device = dq.physical_device(),
+      .render_pass = *m_rp,
+      .attachments = {{ m_c0.image_view() }},
+      .extent = ext,
+    }) }
+    , m_fb1 { vee::create_framebuffer({
+      .physical_device = dq.physical_device(),
+      .render_pass = *m_rp,
+      .attachments = {{ m_c1.image_view() }},
+      .extent = ext,
+    }) }
+    , m_p0 { dq, dset_scriber, dset_chars, *m_rp, ext }
+    , m_p1 { dq, m_c0.image_view(), *m_rp, ext } {}
 
-  void render(vee::command_buffer cb) {
+  void render_0(vee::command_buffer cb) {
+    voo::cmd_render_pass rp { vee::render_pass_begin {
+      .command_buffer = cb,
+      .render_pass = *m_rp,
+      .framebuffer = *m_fb0,
+      .extent = m_ext,
+      .clear_colours { vee::clear_colour({}) },
+    }};
+    vee::cmd_set_scissor(cb, m_ext);
+    vee::cmd_set_viewport(cb, m_ext);
     m_p0.render(cb);
     vee::cmd_pipeline_barrier(cb, m_c0.image(), vee::from_fragment_to_fragment);
+  }
+  void render_1(vee::command_buffer cb) {
+    voo::cmd_render_pass rp { vee::render_pass_begin {
+      .command_buffer = cb,
+      .render_pass = *m_rp,
+      .framebuffer = *m_fb1,
+      .extent = m_ext,
+      .clear_colours { vee::clear_colour({}) },
+    }};
+    vee::cmd_set_scissor(cb, m_ext);
+    vee::cmd_set_viewport(cb, m_ext);
     m_p1.render(cb);
     vee::cmd_pipeline_barrier(cb, m_c1.image(), vee::from_fragment_to_fragment);
+  }
+  void render(vee::command_buffer cb) {
+    render_0(cb);
+    render_1(cb);
   }
 
   [[nodiscard]] auto image_view() const { return m_c1.image_view(); }
