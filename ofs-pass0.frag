@@ -32,5 +32,5 @@ void main() {
   }
 
   c = 1 - c;
-  colour = vec4(c);
+  colour = vec4(c, 0, 0, 1);
 }
