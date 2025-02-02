@@ -24,5 +24,5 @@ void main() {
   cc = min(cc, texture(atlas, p + vec2( e.x, -e.y)) + dd);
   cc = min(cc, texture(atlas, p + vec2(-e.x, -e.y)) + dd);
   
-  colour = vec4(cc.r);
+  colour = vec4(cc.r, 0, 0, 1);
 }
