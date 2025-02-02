@@ -98,7 +98,7 @@ export class ofs {
 
   vee::descriptor_set_layout m_dsl;
   vee::descriptor_pool m_pool;
-  vee::descriptor_set m_dset;
+  vee::descriptor_set m_dsets[2];
 
   voo::offscreen::colour_buffer m_c0;
   voo::offscreen::colour_buffer m_c1;
@@ -134,8 +134,11 @@ public:
     , m_smp { vee::create_sampler(vee::linear_sampler) }
 
     , m_dsl { vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }) }
-    , m_pool { vee::create_descriptor_pool(1, { vee::combined_image_sampler() }) }
-    , m_dset { vee::allocate_descriptor_set(*m_pool, *m_dsl) }
+    , m_pool { vee::create_descriptor_pool(2, { vee::combined_image_sampler(2) }) }
+    , m_dsets {
+      vee::allocate_descriptor_set(*m_pool, *m_dsl),
+      vee::allocate_descriptor_set(*m_pool, *m_dsl),
+    }
 
     , m_c0 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
     , m_c1 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
@@ -153,7 +156,8 @@ public:
     }) }
     , m_p0 { m_quad, dset_scriber, dset_chars, *m_rp }
     , m_p1 { m_quad, m_c0.image_view(), *m_rp } {
-    vee::update_descriptor_set(m_dset, 0, m_c0.image_view(), *m_smp);
+    vee::update_descriptor_set(m_dsets[0], 0, m_c0.image_view(), *m_smp);
+    vee::update_descriptor_set(m_dsets[1], 0, m_c1.image_view(), *m_smp);
   }
 
   void render(vee::command_buffer cb) {
@@ -161,7 +165,7 @@ public:
     vee::cmd_pipeline_barrier(cb, m_c0.image(), vee::from_fragment_to_fragment);
 
     render(cb, *m_fb1, [this, cb] {
-      m_p1.render(cb, m_dset, m_ext);
+      m_p1.render(cb, m_dsets[0], m_ext);
     });
     vee::cmd_pipeline_barrier(cb, m_c1.image(), vee::from_fragment_to_fragment);
   }
