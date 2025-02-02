@@ -9,6 +9,8 @@ struct chr {
   dotz::vec4 uv;
 };
 
+static constexpr const auto max_chars = 16;
+
 class chr_pump {
   voo::mapmem m_mm;
   chr * m_vs;
@@ -16,14 +18,14 @@ class chr_pump {
 public:
   explicit chr_pump(vee::device_memory::type m)
     : m_mm { m }
-    , m_vs { static_cast<chr *>(*m_mm) } {}
+    , m_vs { static_cast<chr *>(*m_mm) } {
+    for (auto i = 0; i < max_chars; i++) m_vs[i] = {};
+  }
 
   void pump(chr c) { *m_vs++ = c; }
 };
 
 export class chars {
-  static constexpr const auto max_chars = 16;
-
   voo::single_dset m_dset { vee::dsl_fragment_storage(), vee::storage_buffer() };
   voo::host_buffer m_chrs;
 
