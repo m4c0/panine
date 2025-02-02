@@ -4,6 +4,7 @@
 
 import audio;
 import casein;
+import jute;
 import scriber;
 import sitime;
 import vapp;
@@ -43,7 +44,7 @@ struct init : public vapp {
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
-      bool copied = false;
+      jute::view text = "These";
 
       extent_loop(dq.queue(), sw, [&] {
         if (!started) {
@@ -51,23 +52,29 @@ struct init : public vapp {
           timer = {};
           started = true;
         }
+        if (timer.millis() > 300) text = "are";
+        //if (timer.millis() > 300) text = "";
 
         upc pc { .aspect = sw.aspect() };
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          if (!copied) {
-            s.shape(*pcb, 1024, font_h, "Engineering");
-            copied = true;
+          if (text.data()) s.shape(*pcb, 1024, font_h, text);
+
+          {
+            auto scb = sw.cmd_render_pass({
+              .command_buffer = *pcb,
+              .clear_colours { vee::clear_colour({}) },
+            });
+            oqr.run(*scb, sw.extent(), [&] {
+              vee::cmd_push_fragment_constants(*pcb, *pl, &pc);
+              vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset.descriptor_set());
+            });
           }
 
-          auto scb = sw.cmd_render_pass({
-            .command_buffer = *pcb,
-            .clear_colours { vee::clear_colour({}) },
-          });
-          oqr.run(*scb, sw.extent(), [&] {
-            vee::cmd_push_fragment_constants(*pcb, *pl, &pc);
-            vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset.descriptor_set());
-          });
+          if (text.data()) {
+            s.clear_host(*pcb);
+            text = {};
+          }
         });
       });
     });

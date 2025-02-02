@@ -12,7 +12,6 @@ export class scriber {
   vtw::scriber m_scr;
   ofs m_ofs;
 
-  void setup_copy(vee::command_buffer cb) { m_scr.setup_copy(cb); }
   void shape(int scr_w, unsigned font_h, jute::view txt);
 
 public:
@@ -25,9 +24,10 @@ public:
 
   void shape(vee::command_buffer cb, int scr_w, unsigned font_h, jute::view txt) {
     shape(scr_w, font_h, txt);
-    setup_copy(cb);
+    m_scr.setup_copy(cb);
     m_ofs.render(cb);
   }
+  void clear_host(vee::command_buffer cb) { m_scr.clear_host(cb); }
 
   auto image_view() const { return m_ofs.image_view(); }
 };
