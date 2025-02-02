@@ -33,8 +33,7 @@ public:
   pass0(const voo::one_quad & quad,
         vee::descriptor_set dset_scriber,
         vee::descriptor_set dset_chars,
-        vee::render_pass::type rp,
-        vee::extent ext)
+        vee::render_pass::type rp)
     : m_dset_scriber { dset_scriber }
     , m_dset_chars { dset_chars }
     , m_pl { vee::create_pipeline_layout({
@@ -62,15 +61,13 @@ public:
 class pass1 {
   vee::pipeline_layout m_pl;
   vee::gr_pipeline m_gp;
-  vee::extent m_ext;
 
   struct upc { dotz::vec2 ext; };
 
 public:
   pass1(const voo::one_quad & quad,
         vee::image_view::type in, 
-        vee::render_pass::type rp,
-        vee::extent ext)
+        vee::render_pass::type rp)
     : m_pl { vee::create_pipeline_layout(
       { *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }) },
       { vee::fragment_push_constant_range<upc>() }) }
@@ -83,11 +80,10 @@ public:
         },
         .bindings { quad.vertex_input_bind() },
         .attributes { quad.vertex_attribute(0) },
-      }) }
-    , m_ext { ext } {}
+      }) } {}
 
-  void render(vee::command_buffer cb, vee::descriptor_set dset) {
-    upc pc { { m_ext.width, m_ext.height } };
+  void render(vee::command_buffer cb, vee::descriptor_set dset, vee::extent ext) {
+    upc pc { { ext.width, ext.height } };
     vee::cmd_push_fragment_constants(cb, *m_pl, &pc);
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
     vee::cmd_bind_descriptor_set(cb, *m_pl, 0, dset);
@@ -150,15 +146,15 @@ public:
       .attachments = {{ m_c1.image_view() }},
       .extent = ext,
     }) }
-    , m_p0 { m_quad, dset_scriber, dset_chars, *m_rp, ext }
-    , m_p1 { m_quad, m_c0.image_view(), *m_rp, ext } {
+    , m_p0 { m_quad, dset_scriber, dset_chars, *m_rp }
+    , m_p1 { m_quad, m_c0.image_view(), *m_rp } {
     vee::update_descriptor_set(m_dset.descriptor_set(), 0, m_c0.image_view(), *m_smp);
   }
 
   void render(vee::command_buffer cb) {
     render(cb, *m_fb0, m_c0.image(), [this, cb] { m_p0.render(cb); });
     render(cb, *m_fb1, m_c1.image(), [this, cb] {
-      m_p1.render(cb, m_dset.descriptor_set());
+      m_p1.render(cb, m_dset.descriptor_set(), m_ext);
     });
   }
 
