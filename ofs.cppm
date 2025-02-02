@@ -30,8 +30,7 @@ class pass0 {
   vee::gr_pipeline m_gp;
 
 public:
-  pass0(const voo::device_and_queue & dq,
-        const voo::one_quad & quad,
+  pass0(const voo::one_quad & quad,
         vee::descriptor_set dset_scriber,
         vee::descriptor_set dset_chars,
         vee::render_pass::type rp,
@@ -70,8 +69,7 @@ class pass1 {
   struct upc { dotz::vec2 ext; };
 
 public:
-  pass1(const voo::device_and_queue & dq,
-        const voo::one_quad & quad,
+  pass1(const voo::one_quad & quad,
         vee::image_view::type in, 
         vee::render_pass::type rp,
         vee::extent ext)
@@ -155,8 +153,8 @@ public:
       .attachments = {{ m_c1.image_view() }},
       .extent = ext,
     }) }
-    , m_p0 { dq, m_quad, dset_scriber, dset_chars, *m_rp, ext }
-    , m_p1 { dq, m_quad, m_c0.image_view(), *m_rp, ext } {}
+    , m_p0 { m_quad, dset_scriber, dset_chars, *m_rp, ext }
+    , m_p1 { m_quad, m_c0.image_view(), *m_rp, ext } {}
 
   void render(vee::command_buffer cb) {
     render(cb, *m_fb0, m_p0, m_c0.image());
