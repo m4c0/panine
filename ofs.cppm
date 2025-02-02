@@ -164,11 +164,14 @@ public:
     render(cb, *m_fb0, [this, cb] { m_p0.render(cb); });
     vee::cmd_pipeline_barrier(cb, m_c0.image(), vee::from_fragment_to_fragment);
 
-    render(cb, *m_fb1, [this, cb] {
-      m_p1.render(cb, m_dsets[0], m_ext);
-    });
-    vee::cmd_pipeline_barrier(cb, m_c1.image(), vee::from_fragment_to_fragment);
+    for (auto i = 0; i < 32; i++) {
+      render(cb, *m_fb1, [this, cb] { m_p1.render(cb, m_dsets[0], m_ext); });
+      vee::cmd_pipeline_barrier(cb, m_c1.image(), vee::from_fragment_to_fragment);
+
+      render(cb, *m_fb0, [this, cb] { m_p1.render(cb, m_dsets[1], m_ext); });
+      vee::cmd_pipeline_barrier(cb, m_c0.image(), vee::from_fragment_to_fragment);
+    }
   }
 
-  [[nodiscard]] auto image_view() const { return m_c1.image_view(); }
+  [[nodiscard]] auto image_view() const { return m_c0.image_view(); }
 };
