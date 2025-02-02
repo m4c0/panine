@@ -24,8 +24,6 @@ static vee::render_pass create_render_pass() {
 }
 
 class pass0 {
-  voo::offscreen::colour_buffer m_cbuf;
-
   voo::one_quad m_quad;
 
   vee::descriptor_set m_dset_scriber;
@@ -40,9 +38,9 @@ public:
   pass0(const voo::device_and_queue & dq,
       vee::descriptor_set dset_scriber,
       vee::descriptor_set dset_chars,
+      vee::image_view::type out,
       vee::extent ext)
-    : m_cbuf { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
-    , m_quad { dq.physical_device() }
+    : m_quad { dq.physical_device() }
     , m_dset_scriber { dset_scriber }
     , m_dset_chars { dset_chars }
     , m_pl { vee::create_pipeline_layout({
@@ -63,7 +61,7 @@ public:
     , m_fb { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
-      .attachments = {{ m_cbuf.image_view() }},
+      .attachments = {{ out }},
       .extent = ext,
     }) }
     , m_ext { ext } {}
@@ -83,14 +81,9 @@ public:
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
     m_quad.run(cb, 0, 1);
   }
-
-  [[nodiscard]] auto image() const { return m_cbuf.image(); }
-  [[nodiscard]] auto image_view() const { return m_cbuf.image_view(); }
 };
 
 class pass1 {
-  voo::offscreen::colour_buffer m_cbuf;
-
   voo::one_quad m_quad;
 
   voo::single_dset m_dset;
@@ -104,9 +97,11 @@ class pass1 {
   struct upc { dotz::vec2 ext; };
 
 public:
-  pass1(const voo::device_and_queue & dq, vee::image_view::type p0, vee::extent ext)
-    : m_cbuf { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
-    , m_quad { dq.physical_device() }
+  pass1(const voo::device_and_queue & dq,
+        vee::image_view::type in, 
+        vee::image_view::type out, 
+        vee::extent ext)
+    : m_quad { dq.physical_device() }
     , m_dset { vee::dsl_fragment_sampler(), vee::combined_image_sampler() }
     , m_pl { vee::create_pipeline_layout({
         *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
@@ -127,12 +122,12 @@ public:
     , m_fb { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
-      .attachments = {{ m_cbuf.image_view() }},
+      .attachments = {{ out }},
       .extent = ext,
     }) }
     , m_smp { vee::create_sampler(vee::linear_sampler) }
     , m_ext { ext } {
-    vee::update_descriptor_set(m_dset.descriptor_set(), 0, p0, *m_smp);
+    vee::update_descriptor_set(m_dset.descriptor_set(), 0, in, *m_smp);
   }
 
   void render(vee::command_buffer cb) {
@@ -151,11 +146,12 @@ public:
     vee::cmd_bind_gr_pipeline(cb, *m_gp);
     m_quad.run(cb, 0, 1);
   }
-
-  [[nodiscard]] auto image_view() const { return m_cbuf.image_view(); }
 };
 
 export class ofs {
+  voo::offscreen::colour_buffer m_c0;
+  voo::offscreen::colour_buffer m_c1;
+
   pass0 m_p0;
   pass1 m_p1;
 
@@ -164,14 +160,17 @@ public:
       vee::descriptor_set dset_scriber,
       vee::descriptor_set dset_chars,
       vee::extent ext)
-    : m_p0 { dq, dset_scriber, dset_chars, ext }
-    , m_p1 { dq, m_p0.image_view(), ext } {}
+    : m_c0 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
+    , m_c1 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
+    , m_p0 { dq, dset_scriber, dset_chars, m_c0.image_view(), ext }
+    , m_p1 { dq, m_c0.image_view(), m_c1.image_view(), ext } {}
 
   void render(vee::command_buffer cb) {
     m_p0.render(cb);
-    vee::cmd_pipeline_barrier(cb, m_p0.image(), vee::from_fragment_to_fragment);
+    vee::cmd_pipeline_barrier(cb, m_c0.image(), vee::from_fragment_to_fragment);
     m_p1.render(cb);
+    vee::cmd_pipeline_barrier(cb, m_c1.image(), vee::from_fragment_to_fragment);
   }
 
-  [[nodiscard]] auto image_view() const { return m_p1.image_view(); }
+  [[nodiscard]] auto image_view() const { return m_c1.image_view(); }
 };
