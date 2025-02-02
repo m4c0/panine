@@ -45,6 +45,7 @@ struct init : public vapp {
       voo::one_quad_render oqr { "main", &dq, *pl };
 
       jute::view text = "These";
+      jute::view cur_text {};
 
       extent_loop(dq.queue(), sw, [&] {
         if (!started) {
@@ -52,13 +53,13 @@ struct init : public vapp {
           timer = {};
           started = true;
         }
-        if (timer.millis() > 300) text = "are";
-        //if (timer.millis() > 300) text = "";
+        if (timer.millis() > 600) text = "are";
+        if (timer.millis() > 1200) text = "five";
 
         upc pc { .aspect = sw.aspect() };
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          if (text.data()) s.shape(*pcb, 1024, font_h, text);
+          if (text != cur_text) s.shape(*pcb, 1024, font_h, text);
 
           {
             auto scb = sw.cmd_render_pass({
@@ -71,9 +72,9 @@ struct init : public vapp {
             });
           }
 
-          if (text.data()) {
-            s.clear_host(*pcb);
-            text = {};
+          if (text != cur_text) {
+            s.clear_glyphs(*pcb);
+            cur_text = text;
           }
         });
       });

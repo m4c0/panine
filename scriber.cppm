@@ -27,7 +27,7 @@ public:
     m_scr.setup_copy(cb);
     m_ofs.render(cb);
   }
-  void clear_host(vee::command_buffer cb) { m_scr.clear_host(cb); }
+  void clear_glyphs(vee::command_buffer cb) { m_scr.clear_glyphs(cb); }
 
   auto image_view() const { return m_ofs.image_view(); }
 };
