@@ -6,6 +6,7 @@ import audio;
 import casein;
 import jute;
 import scriber;
+import scripter;
 import sitime;
 import vapp;
 import vee;
@@ -44,7 +45,7 @@ struct init : public vapp {
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
-      jute::view text = "These";
+      jute::view text = scripter::next();
       jute::view cur_text {};
 
       extent_loop(dq.queue(), sw, [&] {
@@ -53,8 +54,10 @@ struct init : public vapp {
           timer = {};
           started = true;
         }
-        if (timer.millis() > 600) text = "are";
-        if (timer.millis() > 1200) text = "five";
+        if (timer.millis() > 200) {
+          text = scripter::next();
+          timer = {};
+        }
 
         upc pc { .aspect = sw.aspect() };
 
