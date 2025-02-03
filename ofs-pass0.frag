@@ -28,7 +28,7 @@ void main() {
     vec2 n = clamp(pc, 0, 1);
     vec2 uv = cs[i].uv.xy + n * cs[i].uv.zw;
     vec4 cc = texture(atlas, uv);
-    c = mix(c, 1, cc.a * dd);
+    c = mix(c, 1, cc.r * dd);
   }
 
   c = 1 - c;
