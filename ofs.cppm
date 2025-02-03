@@ -10,7 +10,8 @@ import voo;
 static vee::render_pass create_render_pass() {
   return vee::create_render_pass({
     .attachments {{
-      vee::create_colour_attachment(vee::image_format_srgba, vee::image_layout_read_only_optimal),
+      // TODO: use R8 instead of sRGB
+      vee::create_colour_attachment(VK_FORMAT_R8G8B8A8_SRGB, vee::image_layout_read_only_optimal),
     }},
     .subpasses {{
       vee::create_subpass({
@@ -140,8 +141,8 @@ public:
       vee::allocate_descriptor_set(*m_pool, *m_dsl),
     }
 
-    , m_c0 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
-    , m_c1 { dq.physical_device(), ext, vee::image_format_srgba, vee::image_usage_sampled }
+    , m_c0 { dq.physical_device(), ext, VK_FORMAT_R8G8B8A8_SRGB, vee::image_usage_sampled }
+    , m_c1 { dq.physical_device(), ext, VK_FORMAT_R8G8B8A8_SRGB, vee::image_usage_sampled }
     , m_fb0 { vee::create_framebuffer({
       .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
