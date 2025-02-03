@@ -3,16 +3,35 @@
 #pragma leco add_shader "waveform.frag"
 
 import casein;
+import hai;
+import ovo;
+import silog;
 import vee;
 import voo;
 import vapp;
 
+static const auto samples = [] {
+  auto f = ovo::open_file("out/audio.ogg");
+
+  hai::chain<char> res { 48000 * 60 };
+  while (true) {
+    float ** pcm {};
+    int i {};
+    auto sz = ovo::read_float(f, &pcm, 1024, &i);
+    if (sz <= 0) break;
+
+    for (auto i = 0; i < sz; i++) res.push_back(pcm[0][i] * 128.0);
+  }
+  silog::trace("size", res.size());
+  return res;
+}();
+
 static bool copied;
 static void load(auto host_mem) {
   voo::mapmem mm { host_mem };
-  auto ptr = static_cast<float *>(*mm);
+  auto ptr = static_cast<char *>(*mm);
   for (auto i = 0; i < 1024; i++) {
-    *ptr++ = i % 2;
+    *ptr++ = samples.seek(i * 100);
   }
   copied = false;
 }
