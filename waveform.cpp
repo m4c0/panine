@@ -12,6 +12,7 @@ static void load(auto host_mem) {
   voo::mapmem mm { host_mem };
   auto ptr = static_cast<float *>(*mm);
   for (auto i = 0; i < 1024; i++) {
+    *ptr++ = i % 2;
   }
   copied = false;
 }
