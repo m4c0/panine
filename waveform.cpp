@@ -13,6 +13,10 @@ import vapp;
 static constexpr const auto image_w = 2048;
 static constexpr const auto sample_rate = 48000;
 
+static constexpr const auto seconds = 5;
+
+static auto g_windows_to_skip = 0;
+
 static const auto samples = [] {
   auto f = ovo::open_file("out/audio.ogg");
 
@@ -31,16 +35,29 @@ static const auto samples = [] {
 
 static bool copied;
 static void load(auto host_mem) {
+  if (g_windows_to_skip < 0) g_windows_to_skip = 0;
+
   voo::mapmem mm { host_mem };
   auto ptr = static_cast<char *>(*mm);
   for (auto i = 0; i < image_w; i++) {
-    *ptr++ = samples.seek(i * 48000 / image_w);
+    auto s = seconds * (i + g_windows_to_skip) * sample_rate / image_w;
+    *ptr++ = s < samples.size() ? samples.seek(s) : 0;
   }
   copied = false;
 }
 static void copy(auto cb, auto & img) {
   img.setup_copy(cb);
   copied = true;
+}
+
+static void skip(int x, auto host_mem) {
+  g_windows_to_skip += x * 64;
+  load(host_mem);
+}
+static void setup_keys(auto host_mem) {
+  using namespace casein;
+  handle(KEY_DOWN, K_LEFT,  [=] { skip(-1, host_mem); });
+  handle(KEY_DOWN, K_RIGHT, [=] { skip(+1, host_mem); });
 }
 
 static struct : vapp {
@@ -55,6 +72,7 @@ static struct : vapp {
       vee::update_descriptor_set(dset.descriptor_set(), 0, img.iv(), *smp);
 
       load(img.host_memory());
+      setup_keys(img.host_memory());
 
       auto pl = vee::create_pipeline_layout({ dset.descriptor_set_layout() });
       voo::one_quad_render oqr { "waveform", &dq, *pl };
