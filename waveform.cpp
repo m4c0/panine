@@ -10,10 +10,13 @@ import vee;
 import voo;
 import vapp;
 
+static constexpr const auto image_w = 2048;
+static constexpr const auto sample_rate = 48000;
+
 static const auto samples = [] {
   auto f = ovo::open_file("out/audio.ogg");
 
-  hai::chain<char> res { 48000 * 60 };
+  hai::chain<char> res { sample_rate * 60 };
   while (true) {
     float ** pcm {};
     int i {};
@@ -30,8 +33,8 @@ static bool copied;
 static void load(auto host_mem) {
   voo::mapmem mm { host_mem };
   auto ptr = static_cast<char *>(*mm);
-  for (auto i = 0; i < 1024; i++) {
-    *ptr++ = samples.seek(i * 100);
+  for (auto i = 0; i < image_w; i++) {
+    *ptr++ = samples.seek(i * 48000 / image_w);
   }
   copied = false;
 }
@@ -44,7 +47,7 @@ static struct : vapp {
   void run() override {
     main_loop("waveform", [&](auto & dq, auto & sw) {
       auto smp = vee::create_sampler(vee::linear_sampler);
-      voo::h2l_image img { dq.physical_device(), 1024, 1, VK_FORMAT_R8_UNORM };
+      voo::h2l_image img { dq.physical_device(), image_w, 1, VK_FORMAT_R8_UNORM };
       voo::single_dset dset {
         vee::dsl_fragment_sampler(),
         vee::combined_image_sampler(),
