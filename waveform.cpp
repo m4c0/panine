@@ -14,6 +14,7 @@ static constexpr const auto image_w = 2048;
 static constexpr const auto sample_rate = 48000;
 
 static constexpr const auto seconds = 5;
+static constexpr const auto skip_len = 64;
 
 static auto g_windows_to_skip = 0;
 
@@ -51,7 +52,7 @@ static void copy(auto cb, auto & img) {
 }
 
 static void skip(int x, auto host_mem) {
-  g_windows_to_skip += x * 64;
+  g_windows_to_skip += x * skip_len;
   load(host_mem);
 }
 static void setup_keys(auto host_mem) {

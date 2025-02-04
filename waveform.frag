@@ -8,6 +8,5 @@ layout(location = 0) out vec4 colour;
 
 void main() {
   float c = texture(buf, vec2(pos.x, 0)).r;
-  if (c > pos.y) c = 0;
   colour = vec4(0, c, 0, 1);
 }
