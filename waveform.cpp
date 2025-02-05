@@ -12,16 +12,14 @@ import voo;
 import vapp;
 
 // TODO: draw "pointer" when playing
-// TODO: sync window and audio
 
 static constexpr const auto image_w = 2048;
 static constexpr const auto sample_rate = 48000;
 
 static constexpr const auto seconds = 1;
-static constexpr const auto skip_len = 64;
+static constexpr const auto skip_len = 0.1f;
 
-// TODO: use timestamp instead of "window fractions"
-static auto g_windows_to_skip = 0;
+static float g_timestamp = 0.0f;
 
 static const auto samples = [] {
   auto f = ovo::open_file("out/audio.ogg");
@@ -38,16 +36,22 @@ static const auto samples = [] {
   silog::trace("size", res.size());
   return res;
 }();
+static float sample(unsigned i) {
+  if (i > seconds * sample_rate) return 0;
+
+  i += g_timestamp * sample_rate;
+  if (i > samples.size()) return 0;
+
+  return samples.seek(i);
+}
 
 static bool copied;
 static void load(auto host_mem) {
-  if (g_windows_to_skip < 0) g_windows_to_skip = 0;
-
   voo::mapmem mm { host_mem };
   auto ptr = static_cast<char *>(*mm);
   for (auto i = 0; i < image_w; i++) {
-    auto s = seconds * (i + g_windows_to_skip) * sample_rate / image_w;
-    *ptr++ = s < samples.size() ? 128 * samples.seek(s) : 0;
+    auto s = seconds * i * sample_rate / image_w;
+    *ptr++ = sample(s) * 128;
   }
   copied = false;
 }
@@ -59,9 +63,7 @@ static void copy(auto cb, auto & img) {
 static unsigned g_audio_i {};
 static void audio_filler(float * data, unsigned count) {
   for (auto i = 0; i < count; i++) {
-    data[i] = (g_audio_i < seconds * sample_rate) 
-      ? samples.seek(g_audio_i++)
-      : 0;
+    data[i] = sample(g_audio_i++);
   }
 }
 static void play() {
@@ -70,7 +72,8 @@ static void play() {
   siaudio::rate(sample_rate);
 }
 static void skip(int x, auto host_mem) {
-  g_windows_to_skip += x * skip_len;
+  g_timestamp += x * skip_len;
+  if (g_timestamp < 0) g_timestamp = 0;
   load(host_mem);
 }
 static void setup_keys(auto host_mem) {
