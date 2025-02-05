@@ -12,6 +12,7 @@ import voo;
 import vapp;
 
 // TODO: draw "pointer" when playing
+// TODO: support for variable scroll increments
 
 static constexpr const auto image_w = 2048;
 static constexpr const auto sample_rate = 48000;
