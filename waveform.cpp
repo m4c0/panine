@@ -12,13 +12,13 @@ import voo;
 import vapp;
 
 // TODO: draw "pointer" when playing
-// TODO: support for variable scroll increments
 
 static constexpr const auto image_w = 2048;
 static constexpr const auto sample_rate = 48000;
 
 static constexpr const auto seconds = 1;
 static constexpr const auto skip_len = 0.1f;
+static constexpr const auto micro_skip_len = 0.0125f;
 
 static float g_timestamp = 0.0f;
 
@@ -61,6 +61,7 @@ static void copy(auto cb, auto & img) {
   copied = true;
 }
 
+static float g_skip = skip_len;
 static unsigned g_audio_i {};
 static void audio_filler(float * data, unsigned count) {
   for (auto i = 0; i < count; i++) {
@@ -73,7 +74,7 @@ static void play() {
   siaudio::rate(sample_rate);
 }
 static void skip(int x, auto host_mem) {
-  g_timestamp += x * skip_len;
+  g_timestamp += x * g_skip;
   if (g_timestamp < 0) g_timestamp = 0;
   load(host_mem);
 }
@@ -83,6 +84,9 @@ static void setup_keys(auto host_mem) {
   handle(KEY_DOWN, K_RIGHT, [=] { skip(+1, host_mem); });
   handle(KEY_DOWN, K_SPACE, play);
   handle(KEY_DOWN, K_Q, [] { interrupt(IRQ_QUIT); });
+
+  handle(KEY_DOWN, K_M, [] { g_skip = micro_skip_len; });
+  handle(KEY_UP,   K_M, [] { g_skip = skip_len; });
 }
 
 static struct : vapp {
