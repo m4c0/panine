@@ -5,30 +5,35 @@
 import casein;
 import hai;
 import ovo;
+import siaudio;
 import silog;
 import vee;
 import voo;
 import vapp;
 
+// TODO: draw "pointer" when playing
+// TODO: sync window and audio
+
 static constexpr const auto image_w = 2048;
 static constexpr const auto sample_rate = 48000;
 
-static constexpr const auto seconds = 5;
+static constexpr const auto seconds = 1;
 static constexpr const auto skip_len = 64;
 
+// TODO: use timestamp instead of "window fractions"
 static auto g_windows_to_skip = 0;
 
 static const auto samples = [] {
   auto f = ovo::open_file("out/audio.ogg");
 
-  hai::chain<char> res { sample_rate * 60 };
+  hai::chain<float> res { sample_rate * 60 };
   while (true) {
     float ** pcm {};
     int i {};
     auto sz = ovo::read_float(f, &pcm, 1024, &i);
     if (sz <= 0) break;
 
-    for (auto i = 0; i < sz; i++) res.push_back(pcm[0][i] * 128.0);
+    for (auto i = 0; i < sz; i++) res.push_back(pcm[0][i]);
   }
   silog::trace("size", res.size());
   return res;
@@ -42,7 +47,7 @@ static void load(auto host_mem) {
   auto ptr = static_cast<char *>(*mm);
   for (auto i = 0; i < image_w; i++) {
     auto s = seconds * (i + g_windows_to_skip) * sample_rate / image_w;
-    *ptr++ = s < samples.size() ? samples.seek(s) : 0;
+    *ptr++ = s < samples.size() ? 128 * samples.seek(s) : 0;
   }
   copied = false;
 }
@@ -51,6 +56,19 @@ static void copy(auto cb, auto & img) {
   copied = true;
 }
 
+static unsigned g_audio_i {};
+static void audio_filler(float * data, unsigned count) {
+  for (auto i = 0; i < count; i++) {
+    data[i] = (g_audio_i < seconds * sample_rate) 
+      ? samples.seek(g_audio_i++)
+      : 0;
+  }
+}
+static void play() {
+  g_audio_i = 0;
+  siaudio::filler(audio_filler);
+  siaudio::rate(sample_rate);
+}
 static void skip(int x, auto host_mem) {
   g_windows_to_skip += x * skip_len;
   load(host_mem);
@@ -59,6 +77,8 @@ static void setup_keys(auto host_mem) {
   using namespace casein;
   handle(KEY_DOWN, K_LEFT,  [=] { skip(-1, host_mem); });
   handle(KEY_DOWN, K_RIGHT, [=] { skip(+1, host_mem); });
+  handle(KEY_DOWN, K_SPACE, play);
+  handle(KEY_DOWN, K_Q, [] { interrupt(IRQ_QUIT); });
 }
 
 static struct : vapp {
