@@ -90,6 +90,10 @@ static void setup_keys(auto host_mem) {
 }
 
 static struct : vapp {
+  struct upc {
+    float probe;
+  };
+
   void run() override {
     main_loop("waveform", [&](auto & dq, auto & sw) {
       auto smp = vee::create_sampler(vee::linear_sampler);
@@ -103,13 +107,18 @@ static struct : vapp {
       load(img.host_memory());
       setup_keys(img.host_memory());
 
-      auto pl = vee::create_pipeline_layout({ dset.descriptor_set_layout() });
+      auto pl = vee::create_pipeline_layout(
+          { dset.descriptor_set_layout() },
+          { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "waveform", &dq, *pl };
       ots_loop(dq, sw, [&](auto cb) {
         if (!copied) copy(cb, img);
 
         auto scb = sw.cmd_render_pass({ cb });
         oqr.run(cb, sw.extent(), [&] {
+          float f = static_cast<float>(g_audio_i) / (seconds * sample_rate); 
+          upc pc { f };
+          vee::cmd_push_fragment_constants(cb, *pl, &pc);
           vee::cmd_bind_descriptor_set(cb, *pl, 0, dset.descriptor_set());
         });
       });
