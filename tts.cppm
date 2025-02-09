@@ -77,19 +77,23 @@ public:
   }
 
   bool playing() { return m_playing; }
-} t;
+};
+static auto & t() {
+  static globals g {};
+  return g;
+}
 
 static void audio_filler(float * data, unsigned samples) {
   for (auto i = 0; i < samples; i++) data[i] = 0;
 
   short buf[16000];
-  auto i = t.read(buf, samples);
+  auto i = t().read(buf, samples);
   for (auto x = 0; x < i; x++) {
     float s = buf[x];
     data[x] = s / ((2 << 16) - 1);
   }
 }
 
-bool tts::playing() { return t.playing(); }
-void tts::word(jute::view w) { t.word(w); }
+bool tts::playing() { return t().playing(); }
+void tts::word(jute::view w) { t().word(w); }
 
