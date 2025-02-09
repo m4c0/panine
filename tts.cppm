@@ -38,9 +38,12 @@ class globals {
 
 public:
   globals() {
+    m_emb.write_pho("_ 80 ");
     siaudio::filler(audio_filler);
     siaudio::rate(audio_rate);
-    m_emb.write_pho("_ 80 ");
+  }
+  ~globals() {
+    siaudio::rate(0);
   }
 
   void word(jute::view w) {
