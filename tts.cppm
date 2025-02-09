@@ -16,12 +16,15 @@ module :private;
 static const char * arpa2sampa(jute::view a) {
   if (a == "AA") return "Q   80 ";
   if (a == "AH") return "V   80 ";
+  if (a == "DH") return "D   80 ";
   if (a == "EH") return "E   80 ";
   if (a == "IH") return "I   80 ";
+  if (a == "IY") return "i:  80 ";
   if (a == "JH") return "dZ  80 ";
   if (a == "N")  return "n   80 ";
   if (a == "NG") return "N   80 ";
   if (a == "R")  return "r   80 ";
+  if (a == "Z")  return "z   80 ";
   
   silog::log(silog::error, "unknown arpa phoneme: [%.*s]",
              static_cast<int>(a.size()), a.begin());
@@ -35,8 +38,10 @@ static void audio_filler(float * data, unsigned samples);
 class globals {
   carnage::map m_cmdict {};
   embrolho::t m_emb {};
-  bool m_playing {};
+
   mtx::mutex m_mutex {};
+  jute::view m_next {};
+  bool m_playing {};
 
 public:
   globals() {

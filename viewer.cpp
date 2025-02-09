@@ -48,6 +48,7 @@ struct init : public vapp {
       extent_loop(dq.queue(), sw, [&] {
         if (!tts::playing()) {
           text = scripter::next();
+          if (!text.size()) throw 0;
           silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
           tts::word(text);
         }
