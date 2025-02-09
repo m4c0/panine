@@ -86,10 +86,15 @@ public:
   void word(jute::view wrd) {
     mtx::lock m { &m_mutex };
 
+    bool longer_pause = false;
+
     auto w = wrd.cstr();
     for (auto & c : w) {
       if (c >= 'A' && c <= 'Z') c |= 0x20;
-      if (c < 'a' || c > 'z') c = 0;
+      if (c == '.' || c == ',') {
+        longer_pause = true;
+        c = 0;
+      }
     }
 
     auto arpa = m_cmdict[jute::view::unsafe(w.begin())];
@@ -103,7 +108,11 @@ public:
       m_emb.write_pho(arpa2sampa(l));
     }
 
-    m_emb.write_pho("_ 80 \n");
+    if (longer_pause) {
+      m_emb.write_pho("_ 160 \n");
+    } else {
+      m_emb.write_pho("_ 40 \n");
+    }
     m_emb.write_pho("#\n");
     m_playing = true;
   }
