@@ -14,17 +14,17 @@ export namespace tts {
 module :private;
 
 static const char * arpa2sampa(jute::view a) {
-  if (a == "AA") return "Q   80 ";
-  if (a == "AH") return "V   80 ";
-  if (a == "DH") return "D   80 ";
-  if (a == "EH") return "E   80 ";
-  if (a == "IH") return "I   80 ";
-  if (a == "IY") return "i:  80 ";
-  if (a == "JH") return "dZ  80 ";
-  if (a == "N")  return "n   80 ";
-  if (a == "NG") return "N   80 ";
-  if (a == "R")  return "r   80 ";
-  if (a == "Z")  return "z   80 ";
+  if (a == "AA") return "Q   80 \n";
+  if (a == "AH") return "V   80 \n";
+  if (a == "DH") return "D   80 \n";
+  if (a == "EH") return "E   80 \n";
+  if (a == "IH") return "I   80 \n";
+  if (a == "IY") return "i:  80 \n";
+  if (a == "JH") return "dZ  80 \n";
+  if (a == "N")  return "n   80 \n";
+  if (a == "NG") return "N   80 \n";
+  if (a == "R")  return "r   80 \n";
+  if (a == "Z")  return "z   80 \n";
   
   silog::log(silog::error, "unknown arpa phoneme: [%.*s]",
              static_cast<int>(a.size()), a.begin());
@@ -45,7 +45,7 @@ class globals {
 
 public:
   globals() {
-    m_emb.write_pho("_ 80 ");
+    m_emb.write_pho("_ 80 \n");
     siaudio::filler(audio_filler);
     siaudio::rate(audio_rate);
   }
@@ -67,8 +67,8 @@ public:
       m_emb.write_pho(arpa2sampa(l));
     }
 
-    m_emb.write_pho("_ 80 ");
-    m_emb.write_pho("#");
+    m_emb.write_pho("_ 80 \n");
+    m_emb.write_pho("#\n");
     m_playing = true;
   }
 
