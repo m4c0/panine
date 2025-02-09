@@ -2,7 +2,15 @@ export module tts;
 import carnage;
 import embrolho;
 import jute;
+import siaudio;
 import silog;
+
+export namespace tts {
+  void word(jute::view w);
+  bool playing();
+}
+
+module :private;
 
 static const char * arpa2sampa(jute::view a) {
   if (a == "AA") return "Q   80 ";
@@ -19,12 +27,21 @@ static const char * arpa2sampa(jute::view a) {
   throw 0;
 }
 
-export class tts {
+// Magic rate from MBROLA
+static constexpr const auto audio_rate = 16000;
+static void audio_filler(float * data, unsigned samples);
+
+class globals {
   carnage::map m_cmdict {};
   embrolho::t m_emb {};
+  bool m_playing {};
 
 public:
-  tts() { m_emb.write_pho("_ 80 "); }
+  globals() {
+    siaudio::filler(audio_filler);
+    siaudio::rate(audio_rate);
+    m_emb.write_pho("_ 80 ");
+  }
 
   void word(jute::view w) {
     auto arpa = m_cmdict[w];
@@ -40,5 +57,30 @@ public:
 
     m_emb.write_pho("_ 80 ");
     m_emb.write_pho("#");
+    m_playing = true;
   }
-};
+
+  unsigned read(short * data, unsigned n) {
+    if (!m_playing) return 0;
+    auto res = m_emb.read(data, n);
+    if (res == 0) m_playing = false;
+    return res;
+  }
+
+  bool playing() { return m_playing; }
+} t;
+
+static void audio_filler(float * data, unsigned samples) {
+  for (auto i = 0; i < samples; i++) data[i] = 0;
+
+  short buf[16000];
+  auto i = t.read(buf, samples);
+  for (auto x = 0; x < i; x++) {
+    float s = buf[x];
+    data[x] = s / ((2 << 16) - 1);
+  }
+}
+
+bool tts::playing() { return t.playing(); }
+void tts::word(jute::view w) { t.word(w); }
+

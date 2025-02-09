@@ -2,12 +2,12 @@
 #pragma leco add_shader "main.frag"
 #pragma leco app
 
-import audio;
 import casein;
 import jute;
 import scriber;
 import scripter;
-import sitime;
+import silog;
+import tts;
 import vapp;
 import vee;
 import voo;
@@ -28,9 +28,6 @@ struct init : public vapp {
   }
 
   void run() {
-    sitime::stopwatch timer {};
-    bool started {};
-
     main_loop("panine", [&](auto & dq, auto & sw) {
       scriber s { dq, { 1024, 1024 } };
 
@@ -45,18 +42,14 @@ struct init : public vapp {
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
-      jute::view text = scripter::next();
+      jute::view text = "";
       jute::view cur_text {};
 
       extent_loop(dq.queue(), sw, [&] {
-        if (!started) {
-          audio::start();
-          timer = {};
-          started = true;
-        }
-        if (timer.millis() > 200) {
+        if (!tts::playing()) {
           text = scripter::next();
-          timer = {};
+          silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
+          tts::word(text);
         }
 
         upc pc { .aspect = sw.aspect() };
