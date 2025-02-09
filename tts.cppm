@@ -2,6 +2,7 @@ export module tts;
 import carnage;
 import embrolho;
 import jute;
+import mtx;
 import siaudio;
 import silog;
 
@@ -35,6 +36,7 @@ class globals {
   carnage::map m_cmdict {};
   embrolho::t m_emb {};
   bool m_playing {};
+  mtx::mutex m_mutex {};
 
 public:
   globals() {
@@ -47,6 +49,8 @@ public:
   }
 
   void word(jute::view w) {
+    mtx::lock m { &m_mutex };
+
     auto arpa = m_cmdict[w];
     while (arpa.size()) {
       auto [l, rest] = arpa.split(' ');
@@ -64,6 +68,8 @@ public:
   }
 
   unsigned read(short * data, unsigned n) {
+    mtx::lock m { &m_mutex };
+
     if (!m_playing) return 0;
     auto res = m_emb.read(data, n);
     if (res == 0) m_playing = false;
