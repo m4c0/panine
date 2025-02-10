@@ -22,7 +22,7 @@ static const char * arpa2sampa(jute::view a) {
   if (a == "AX") return "@   80 \n";
   if (a == "AY") return "aI 120 \n";
   if (a == "B")  return "b   80 \n";
-  if (a == "CH") return "tS  80 \n";
+  if (a == "CH") return "tS 120 \n";
   if (a == "D")  return "d   80 \n";
   if (a == "DH") return "D   80 \n";
   if (a == "DX") return "4   80 \n";
@@ -40,7 +40,7 @@ static const char * arpa2sampa(jute::view a) {
   if (a == "M")  return "m   80 \n";
   if (a == "N")  return "n   80 \n";
   if (a == "NG") return "N   80 \n";
-  if (a == "OW") return "@U  80 \n";
+  if (a == "OW") return "@U 120 \n";
   if (a == "OY") return "OI 120 \n";
   if (a == "P")  return "p   80 \n";
   if (a == "R")  return "r   80 \n";
@@ -49,7 +49,7 @@ static const char * arpa2sampa(jute::view a) {
   if (a == "T")  return "t   80 \n";
   if (a == "TH") return "T   80 \n";
   if (a == "UH") return "U   80 \n";
-  if (a == "UW") return "u:  80 \n";
+  if (a == "UW") return "u: 120 \n";
   if (a == "V")  return "v   80 \n";
   if (a == "W")  return "w   80 \n";
   if (a == "Y")  return "j   80 \n";
