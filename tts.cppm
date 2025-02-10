@@ -14,47 +14,47 @@ export namespace tts {
 module :private;
 
 static const char * arpa2sampa(jute::view a) {
-  if (a == "AA") return "Q   80 \n";
-  if (a == "AE") return "{   80 \n";
-  if (a == "AH") return "V   80 \n";
-  if (a == "AO") return "O: 120 \n";
-  if (a == "AW") return "aU  80 \n";
-  if (a == "AX") return "@   80 \n";
-  if (a == "AY") return "aI 120 \n";
-  if (a == "B")  return "b   80 \n";
-  if (a == "CH") return "tS 120 \n";
-  if (a == "D")  return "d   80 \n";
-  if (a == "DH") return "D   80 \n";
-  if (a == "DX") return "4   80 \n";
-  if (a == "EH") return "E   80 \n";
-  if (a == "ER") return "3: 120 \n";
-  if (a == "EY") return "eI 120 \n";
-  if (a == "F")  return "f   80 \n";
-  if (a == "G")  return "g   80 \n";
-  if (a == "HH") return "h   80 \n";
-  if (a == "IH") return "I   80 \n";
-  if (a == "IY") return "i: 120 \n";
-  if (a == "JH") return "dZ  80 \n";
-  if (a == "K")  return "k   80 \n";
-  if (a == "L")  return "l   80 \n";
-  if (a == "M")  return "m   80 \n";
-  if (a == "N")  return "n   80 \n";
-  if (a == "NG") return "N   80 \n";
-  if (a == "OW") return "@U 120 \n";
-  if (a == "OY") return "OI 120 \n";
-  if (a == "P")  return "p   80 \n";
-  if (a == "R")  return "r   80 \n";
-  if (a == "S")  return "s   80 \n";
-  if (a == "SH") return "S   80 \n";
-  if (a == "T")  return "t   80 \n";
-  if (a == "TH") return "T   80 \n";
-  if (a == "UH") return "U   80 \n";
-  if (a == "UW") return "u: 120 \n";
-  if (a == "V")  return "v   80 \n";
-  if (a == "W")  return "w   80 \n";
-  if (a == "Y")  return "j   80 \n";
-  if (a == "Z")  return "z   80 \n";
-  if (a == "ZW") return "Z   80 \n";
+  if (a == "AA") return "Q   80";
+  if (a == "AE") return "{   80";
+  if (a == "AH") return "V   80";
+  if (a == "AO") return "O: 120";
+  if (a == "AW") return "aU  80";
+  if (a == "AX") return "@   80";
+  if (a == "AY") return "aI 120";
+  if (a == "B")  return "b   80";
+  if (a == "CH") return "tS 120";
+  if (a == "D")  return "d   80";
+  if (a == "DH") return "D   80";
+  if (a == "DX") return "4   80";
+  if (a == "EH") return "E   80";
+  if (a == "ER") return "3: 120";
+  if (a == "EY") return "eI 120";
+  if (a == "F")  return "f   80";
+  if (a == "G")  return "g   80";
+  if (a == "HH") return "h   80";
+  if (a == "IH") return "I   80";
+  if (a == "IY") return "i: 120";
+  if (a == "JH") return "dZ  80";
+  if (a == "K")  return "k   80";
+  if (a == "L")  return "l   80";
+  if (a == "M")  return "m   80";
+  if (a == "N")  return "n   80";
+  if (a == "NG") return "N   80";
+  if (a == "OW") return "@U 120";
+  if (a == "OY") return "OI 120";
+  if (a == "P")  return "p   80";
+  if (a == "R")  return "r   80";
+  if (a == "S")  return "s   80";
+  if (a == "SH") return "S   80";
+  if (a == "T")  return "t   80";
+  if (a == "TH") return "T   80";
+  if (a == "UH") return "U   80";
+  if (a == "UW") return "u: 120";
+  if (a == "V")  return "v   80";
+  if (a == "W")  return "w   80";
+  if (a == "Y")  return "j   80";
+  if (a == "Z")  return "z   80";
+  if (a == "ZW") return "Z   80";
   
   silog::log(silog::error, "unknown arpa phoneme: [%.*s]",
              static_cast<int>(a.size()), a.begin());
@@ -98,6 +98,7 @@ public:
     }
 
     auto arpa = m_cmdict[jute::view::unsafe(w.begin())];
+    silog::log(silog::info, "ARPAbet: [%s]", arpa.cstr().begin());
     while (arpa.size()) {
       auto [l, rest] = arpa.split(' ');
       arpa = rest;
@@ -105,7 +106,10 @@ public:
       auto e = l.data()[l.size() - 1];
       if (e >= '0' && e <= '9') l = l.subview(l.size() - 1).before;
 
-      m_emb.write_pho(arpa2sampa(l));
+      auto sampa = arpa2sampa(l);
+      silog::log(silog::info, "/%s/", sampa);
+      m_emb.write_pho(sampa);
+      m_emb.write_pho("\n");
     }
 
     if (longer_pause) {
