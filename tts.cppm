@@ -115,8 +115,6 @@ public:
 
     if (longer_pause) {
       m_emb.write_pho("_ 160 \n");
-    } else {
-      m_emb.write_pho("_ 40 \n");
     }
     m_emb.write_pho("#\n");
     m_playing = true;
