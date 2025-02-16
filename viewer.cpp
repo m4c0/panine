@@ -43,6 +43,8 @@ struct init : public vapp {
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
+      mov m {};
+
       jute::view text = "";
       jute::view cur_text {};
 
