@@ -61,7 +61,7 @@ struct init : public vapp {
           if (!text.size()) throw 0;
           silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
           tts::word(text);
-          mg = sith::run_guard { &m };
+          if (!mg) mg = sith::run_guard { &m };
         }
 
         upc pc { .aspect = sw.aspect() };
