@@ -33,19 +33,24 @@ struct init : public vapp {
     main_loop("panine", [&](auto & dq, auto & sw) {
       scriber s { dq, { 1024, 1024 } };
 
-      voo::single_dset dset {
-        vee::dsl_fragment_sampler(), vee::combined_image_sampler()
-      };
+      mov m { dq.physical_device(), dq.queue() };
+      m.run_once();
+      sith::run_guard mg {};
+
+      auto dsl = vee::create_descriptor_set_layout({
+        vee::dsl_fragment_sampler(),
+        vee::dsl_fragment_sampler(),
+      });
+      auto dpool = vee::create_descriptor_pool(1, { vee::combined_image_sampler(2) });
+      auto dset = vee::allocate_descriptor_set(*dpool, *dsl);
       vee::sampler smp = vee::create_sampler(vee::linear_sampler);
-      vee::update_descriptor_set(dset.descriptor_set(), 0, s.image_view(), *smp);
+      vee::update_descriptor_set(dset, 0, s.image_view(), *smp);
+      vee::update_descriptor_set(dset, 1, m.image_view(), *smp);
 
       auto pl = vee::create_pipeline_layout(
-          { dset.descriptor_set_layout() },
+          { *dsl },
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
-
-      mov m { dq.physical_device(), dq.queue() };
-      sith::run_guard mg {};
 
       jute::view text = "";
       jute::view cur_text {};
@@ -71,7 +76,7 @@ struct init : public vapp {
             });
             oqr.run(*scb, sw.extent(), [&] {
               vee::cmd_push_fragment_constants(*pcb, *pl, &pc);
-              vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset.descriptor_set());
+              vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset);
             });
           }
 

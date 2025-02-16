@@ -1,5 +1,6 @@
 #pragma leco add_impl mov_impl
 export module mov;
+import silog;
 import sitime;
 import vee;
 import voo;
@@ -20,6 +21,7 @@ export class mov : public voo::updater<voo::h2l_image> {
     int w, h;
     auto ptr = mov_data(m_ptr, &w, &h);
     if (img->width() != w || img->height() != h) {
+      silog::log(silog::info, "new image with %dx%d", w, h);
       *img = voo::h2l_image {
         m_pd,
         static_cast<unsigned>(w), static_cast<unsigned>(h),
@@ -40,4 +42,6 @@ public:
     , m_pd { pd }
     , m_ptr { mov_alloc() } {}
   ~mov() { mov_dealloc(m_ptr); }
+
+  auto image_view() const { return data().iv(); }
 };

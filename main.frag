@@ -5,6 +5,7 @@ layout(push_constant) uniform upc {
 };
  
 layout(set = 0, binding = 0) uniform sampler2D text;
+layout(set = 0, binding = 1) uniform sampler2D movie;
 
 layout(location = 0) in vec2 pos;
 
@@ -27,7 +28,7 @@ void main() {
   vec2 p = pos;
   p.y /= aspect;
 
-  vec3 c = vec3(0.1);
+  vec3 c = texture(movie, pos * 0.5 + 0.5).rgb;
   c = subtitle(p, c);
 
   colour = vec4(c, 1);
