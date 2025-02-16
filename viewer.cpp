@@ -8,6 +8,7 @@ import mov;
 import scriber;
 import scripter;
 import silog;
+import sith;
 import tts;
 import vapp;
 import vee;
@@ -43,7 +44,8 @@ struct init : public vapp {
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
-      mov m {};
+      mov m { dq.physical_device(), dq.queue() };
+      sith::run_guard mg {};
 
       jute::view text = "";
       jute::view cur_text {};
@@ -54,6 +56,7 @@ struct init : public vapp {
           if (!text.size()) throw 0;
           silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
           tts::word(text);
+          mg = sith::run_guard { &m };
         }
 
         upc pc { .aspect = sw.aspect() };
