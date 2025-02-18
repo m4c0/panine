@@ -5,10 +5,13 @@ import sitime;
 import vee;
 import voo;
 
-extern "C" void * mov_alloc();
-extern "C" void mov_dealloc(void *);
-extern "C" void mov_frame(void *, double);
-extern "C" unsigned * mov_data(void *, int *, int *);
+extern "C" {
+  void * mov_alloc();
+  void mov_dealloc(void *);
+  void mov_begin_frame(void * m);
+  unsigned * mov_frame(void * m, int * w, int * h);
+  void mov_end_frame(void * m);
+}
 
 export class mov : public voo::updater<voo::h2l_image> {
   sitime::stopwatch m_time;
@@ -16,10 +19,10 @@ export class mov : public voo::updater<voo::h2l_image> {
   void * m_ptr;
 
   void update_data(voo::h2l_image * img) override {
-    mov_frame(m_ptr, m_time.millis() / 1000.0);
+    mov_begin_frame(m_ptr);
 
     int w, h;
-    auto ptr = mov_data(m_ptr, &w, &h);
+    auto ptr = mov_frame(m_ptr, &w, &h);
     if (img->width() != w || img->height() != h) {
       silog::log(silog::info, "new image with %dx%d", w, h);
       *img = voo::h2l_image {
@@ -34,6 +37,8 @@ export class mov : public voo::updater<voo::h2l_image> {
     for (auto i = 0; i < w * h; i++) {
       *mem++ = *ptr++;
     }
+
+    mov_end_frame(m_ptr);
   }
 
 public:
