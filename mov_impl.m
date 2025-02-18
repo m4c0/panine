@@ -34,11 +34,12 @@ void mov_dealloc(void * ptr) {
   id mov = (__bridge_transfer PNNMovie *)ptr;
   NSLog(@"Deallocating %@", mov);
 }
-void mov_begin_frame(PNNMovie * m) {
+int mov_begin_frame(PNNMovie * m) {
   m.smp = [m.out copyNextSampleBuffer];
   m.img = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(m.smp);
 
   CVPixelBufferLockBaseAddress(m.img, kCVPixelBufferLock_ReadOnly);
+  return CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(m.smp)) * 1000.0;
 }
 void * mov_frame(PNNMovie * m, int * w, int * h) {
   *w = CVPixelBufferGetBytesPerRow(m.img) / 4;

@@ -8,7 +8,7 @@ import voo;
 extern "C" {
   void * mov_alloc();
   void mov_dealloc(void *);
-  void mov_begin_frame(void * m);
+  int mov_begin_frame(void * m);
   unsigned * mov_frame(void * m, int * w, int * h);
   void mov_end_frame(void * m);
 }
@@ -19,7 +19,10 @@ export class mov : public voo::updater<voo::h2l_image> {
   void * m_ptr;
 
   void update_data(voo::h2l_image * img) override {
-    mov_begin_frame(m_ptr);
+    auto ms = mov_begin_frame(m_ptr);
+    if (ms > m_time.millis()) {
+      sitime::sleep_ms(ms - m_time.millis());
+    }
 
     int w, h;
     auto ptr = mov_frame(m_ptr, &w, &h);
