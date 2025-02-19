@@ -4,12 +4,12 @@
 
 import casein;
 import jute;
+import macspeech;
 import mov;
 import scriber;
 import scripter;
 import silog;
 import sith;
-import tts;
 import vapp;
 import vee;
 import voo;
@@ -32,6 +32,7 @@ struct init : public vapp {
   void run() {
     main_loop("panine", [&](auto & dq, auto & sw) {
       scriber s { dq, { 1024, 1024 } };
+      macspeech ms {};
 
       mov m { dq.physical_device(), dq.queue() };
       m.run_once();
@@ -56,11 +57,11 @@ struct init : public vapp {
       jute::view cur_text {};
 
       extent_loop(dq.queue(), sw, [&] {
-        if (!tts::playing()) {
+        if (!ms.playing()) {
           text = scripter::next();
           if (!text.size()) throw 0;
           silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
-          tts::word(text);
+          ms.synth(text);
           if (!mg) mg = sith::run_guard { &m };
         }
 
