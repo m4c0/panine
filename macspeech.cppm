@@ -7,6 +7,7 @@ extern "C" {
   void * ms_init();
   void ms_deinit(void *);
 
+  const char * ms_current(void *);
   bool ms_playing(void *);
   void ms_synth(void *, const char * c, int n);
 }
@@ -20,6 +21,7 @@ export class macspeech {
 public:
   macspeech() : m_h { ms_init() } {}
 
-  void synth(jute::view word) const { ms_synth(*m_h, word.begin(), word.size()); }
+  auto current() const { return ms_current(*m_h); }
   bool playing() const { return ms_playing(*m_h); }
+  void synth(jute::view word) const { ms_synth(*m_h, word.begin(), word.size()); }
 };

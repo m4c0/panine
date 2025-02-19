@@ -3,6 +3,7 @@
 #pragma leco app
 
 import casein;
+import jojo;
 import jute;
 import macspeech;
 import mov;
@@ -19,6 +20,8 @@ static constexpr const auto window_height = 800;
 static constexpr const auto window_width = window_height * 9 / 16;
 
 static constexpr const auto font_h = 128;
+
+static auto script = jojo::read_cstr("out/script.txt");
 
 struct upc {
   float aspect;
@@ -53,15 +56,15 @@ struct init : public vapp {
           { vee::fragment_push_constant_range<upc>() });
       voo::one_quad_render oqr { "main", &dq, *pl };
 
-      jute::view text = "";
       jute::view cur_text {};
+      ms.synth(script);
 
       extent_loop(dq.queue(), sw, [&] {
-        if (!ms.playing()) {
-          text = scripter::next();
-          if (!text.size()) throw 0;
+        if (!ms.playing()) throw 0;
+
+        auto text = jute::view::unsafe(ms.current());
+        if (cur_text != text) {
           silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
-          ms.synth(text);
           if (!mg) mg = sith::run_guard { &m };
         }
 
