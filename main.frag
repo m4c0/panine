@@ -28,7 +28,12 @@ void main() {
   vec2 p = pos;
   p.y /= aspect;
 
-  vec3 c = texture(movie, pos * 0.5 + 0.5).rgb;
+  vec2 pp = pos;
+  pp.y = abs(pp.y);
+  vec3 c = texture(movie, pp * 0.5 + 0.5).brg * 0.1;
+  
+  c *= pp.y;
+
   c = subtitle(p, c);
 
   colour = vec4(c, 1);
