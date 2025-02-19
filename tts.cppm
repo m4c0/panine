@@ -111,9 +111,9 @@ public:
       m_emb.write_pho(sampa);
       m_emb.write_pho(sampa[1] ? " 120 " : " 80 ");
       switch (e) {
-        case '0': m_emb.write_pho("100 120");
-        case '1': m_emb.write_pho("100 120");
-        case '2': m_emb.write_pho("100 120");
+        // case '0': m_emb.write_pho("100 120");
+        // case '1': m_emb.write_pho("100 120");
+        // case '2': m_emb.write_pho("100 120");
         default: break;
       }
       m_emb.write_pho("\n");
