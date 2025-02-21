@@ -91,7 +91,7 @@ struct init : public vapp {
 
       sith::run_guard mg {};
 
-      jute::view cur_text {};
+      jute::view cur_text { "---------------" };
       ms.synth(script);
 
       extent_loop(dq.queue(), sw, [&] {
