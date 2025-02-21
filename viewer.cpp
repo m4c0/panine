@@ -27,6 +27,44 @@ struct upc {
   float aspect;
 };
 
+class pipeline {
+  vee::descriptor_set_layout m_dsl = vee::create_descriptor_set_layout({
+    vee::dsl_fragment_sampler(),
+    vee::dsl_fragment_sampler(),
+  });
+  vee::descriptor_pool m_dpool = vee::create_descriptor_pool(1, {
+    vee::combined_image_sampler(2)
+  });
+  vee::descriptor_set m_dset = vee::allocate_descriptor_set(*m_dpool, *m_dsl);
+  vee::sampler m_smp = vee::create_sampler(vee::linear_sampler);
+
+  vee::pipeline_layout m_pl = vee::create_pipeline_layout(
+    { *m_dsl },
+    { vee::fragment_push_constant_range<upc>() }
+  );
+  voo::one_quad_render m_oqr;
+
+public:
+  pipeline(
+    voo::device_and_queue * dq,
+    scriber & s,
+    mov & m
+  ) : m_oqr { "main", dq, *m_pl } {
+    vee::update_descriptor_set(m_dset, 0, s.image_view(), *m_smp);
+    vee::update_descriptor_set(m_dset, 1, m.image_view(), *m_smp);
+  }
+
+  void run(vee::command_buffer cb, vee::extent ext) {
+    float w = ext.width;
+    float h = ext.height;
+    upc pc { .aspect = w / h };
+    m_oqr.run(cb, ext, [&] {
+      vee::cmd_push_fragment_constants(cb, *m_pl, &pc);
+      vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset);
+    });
+  }
+};
+
 struct init : public vapp {
   init() {
     casein::window_size = { window_width, window_height };
@@ -41,20 +79,7 @@ struct init : public vapp {
       m.run_once();
       sith::run_guard mg {};
 
-      auto dsl = vee::create_descriptor_set_layout({
-        vee::dsl_fragment_sampler(),
-        vee::dsl_fragment_sampler(),
-      });
-      auto dpool = vee::create_descriptor_pool(1, { vee::combined_image_sampler(2) });
-      auto dset = vee::allocate_descriptor_set(*dpool, *dsl);
-      vee::sampler smp = vee::create_sampler(vee::linear_sampler);
-      vee::update_descriptor_set(dset, 0, s.image_view(), *smp);
-      vee::update_descriptor_set(dset, 1, m.image_view(), *smp);
-
-      auto pl = vee::create_pipeline_layout(
-          { *dsl },
-          { vee::fragment_push_constant_range<upc>() });
-      voo::one_quad_render oqr { "main", &dq, *pl };
+      pipeline ppl { &dq, s, m };
 
       jute::view cur_text {};
       ms.synth(script);
@@ -68,8 +93,6 @@ struct init : public vapp {
           if (!mg) mg = sith::run_guard { &m };
         }
 
-        upc pc { .aspect = sw.aspect() };
-
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           if (text != cur_text) s.shape(*pcb, 1024, font_h, text);
 
@@ -78,10 +101,7 @@ struct init : public vapp {
               .command_buffer = *pcb,
               .clear_colours { vee::clear_colour({}) },
             });
-            oqr.run(*scb, sw.extent(), [&] {
-              vee::cmd_push_fragment_constants(*pcb, *pl, &pc);
-              vee::cmd_bind_descriptor_set(*pcb, *pl, 0, dset);
-            });
+            ppl.run(*scb, sw.extent());
           }
 
           if (text != cur_text) {
