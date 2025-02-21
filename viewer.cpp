@@ -44,15 +44,28 @@ class pipeline {
   );
   voo::one_quad_render m_oqr;
 
+  scriber m_scr;
+  mov m_mov;
+
 public:
-  pipeline(
-    voo::device_and_queue * dq,
-    scriber & s,
-    mov & m
-  ) : m_oqr { "main", dq, *m_pl } {
-    vee::update_descriptor_set(m_dset, 0, s.image_view(), *m_smp);
-    vee::update_descriptor_set(m_dset, 1, m.image_view(), *m_smp);
+  pipeline(voo::device_and_queue * dq)
+    : m_oqr { "main", dq, *m_pl }
+    , m_scr { *dq, { 1024, 1024 } }
+    , m_mov { dq->physical_device(), dq->queue() }
+  {
+    m_mov.run_once();
+    vee::update_descriptor_set(m_dset, 0, m_scr.image_view(), *m_smp);
+    vee::update_descriptor_set(m_dset, 1, m_mov.image_view(), *m_smp);
   }
+
+  void shape(vee::command_buffer cb, jute::view text) {
+    m_scr.shape(cb, 1024, font_h, text);
+  }
+
+  void clear_glyphs(vee::command_buffer cb) { m_scr.clear_glyphs(cb); }
+
+  auto play_movie() { return sith::run_guard { &m_mov }; }
+  void next_frame() { m_mov.run_once(); }
 
   void run(vee::command_buffer cb, vee::extent ext) {
     float w = ext.width;
@@ -72,14 +85,11 @@ struct init : public vapp {
 
   void run() {
     main_loop("panine", [&](auto & dq, auto & sw) {
-      scriber s { dq, { 1024, 1024 } };
       macspeech ms {};
 
-      mov m { dq.physical_device(), dq.queue() };
-      m.run_once();
-      sith::run_guard mg {};
+      pipeline ppl { &dq };
 
-      pipeline ppl { &dq, s, m };
+      sith::run_guard mg {};
 
       jute::view cur_text {};
       ms.synth(script);
@@ -90,22 +100,24 @@ struct init : public vapp {
         auto text = jute::view::unsafe(ms.current());
         if (cur_text != text) {
           silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
-          if (!mg) mg = sith::run_guard { &m };
+          if (!mg) mg = ppl.play_movie();
         }
 
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
-          if (text != cur_text) s.shape(*pcb, 1024, font_h, text);
+          auto rpb = sw.render_pass_begin();
+
+          if (text != cur_text) ppl.shape(*pcb, text);
 
           {
-            auto scb = sw.cmd_render_pass({
-              .command_buffer = *pcb,
-              .clear_colours { vee::clear_colour({}) },
-            });
-            ppl.run(*scb, sw.extent());
+            rpb.command_buffer = *pcb;
+            rpb.clear_colours = { vee::clear_colour({}) };
+
+            voo::cmd_render_pass rp { rpb };
+            ppl.run(*pcb, sw.extent());
           }
 
           if (text != cur_text) {
-            s.clear_glyphs(*pcb);
+            ppl.clear_glyphs(*pcb);
             cur_text = text;
           }
         });
