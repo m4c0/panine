@@ -47,27 +47,9 @@ class pipeline {
   scriber m_scr;
   mov m_mov;
 
-public:
-  pipeline(voo::device_and_queue * dq)
-    : m_oqr { "main", dq, *m_pl }
-    , m_scr { *dq, { 1024, 1024 } }
-    , m_mov { dq->physical_device(), dq->queue() }
-  {
-    m_mov.run_once();
-    vee::update_descriptor_set(m_dset, 0, m_scr.image_view(), *m_smp);
-    vee::update_descriptor_set(m_dset, 1, m_mov.image_view(), *m_smp);
-  }
+  jute::view m_cur = "------------";
 
-  void shape(vee::command_buffer cb, jute::view text) {
-    m_scr.shape(cb, 1024, font_h, text);
-  }
-
-  void clear_glyphs(vee::command_buffer cb) { m_scr.clear_glyphs(cb); }
-
-  auto play_movie() { return sith::run_guard { &m_mov }; }
-  void next_frame() { m_mov.run_once(); }
-
-  void run(vee::command_buffer cb, vee::render_pass_begin rpb) {
+  void render_pass(vee::command_buffer cb, vee::render_pass_begin rpb) {
     rpb.command_buffer = cb;
     rpb.clear_colours = { vee::clear_colour({}) };
     voo::cmd_render_pass rp { rpb };
@@ -79,6 +61,31 @@ public:
       vee::cmd_push_fragment_constants(cb, *m_pl, &pc);
       vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset);
     });
+  }
+
+public:
+  pipeline(voo::device_and_queue * dq)
+    : m_oqr { "main", dq, *m_pl }
+    , m_scr { *dq, { 1024, 1024 } }
+    , m_mov { dq->physical_device(), dq->queue() }
+  {
+    m_mov.run_once();
+    vee::update_descriptor_set(m_dset, 0, m_scr.image_view(), *m_smp);
+    vee::update_descriptor_set(m_dset, 1, m_mov.image_view(), *m_smp);
+  }
+
+  auto play_movie() { return sith::run_guard { &m_mov }; }
+  void next_frame() { m_mov.run_once(); }
+
+  void run(vee::command_buffer cb, vee::render_pass_begin rpb, jute::view text) {
+    if (m_cur != text) m_scr.shape(cb, 1024, font_h, text);
+
+    render_pass(cb, rpb);
+
+    if (m_cur != text) {
+      m_scr.clear_glyphs(cb);
+      m_cur = text;
+    }
   }
 };
 
@@ -93,31 +100,17 @@ struct init : public vapp {
 
       pipeline ppl { &dq };
 
-      sith::run_guard mg {};
+      sith::run_guard mg = ppl.play_movie();
 
-      jute::view cur_text { "---------------" };
       ms.synth(script);
 
       extent_loop(dq.queue(), sw, [&] {
         if (!ms.playing()) throw 0;
 
         auto text = jute::view::unsafe(ms.current());
-        if (cur_text != text) {
-          silog::log(silog::info, "changing word to: [%s]", text.cstr().begin());
-          if (!mg) mg = ppl.play_movie();
-        }
-
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           auto rpb = sw.render_pass_begin();
-
-          if (text != cur_text) ppl.shape(*pcb, text);
-
-          ppl.run(*pcb, rpb);
-
-          if (text != cur_text) {
-            ppl.clear_glyphs(*pcb);
-            cur_text = text;
-          }
+          ppl.run(*pcb, rpb, text);
         });
       });
     });
