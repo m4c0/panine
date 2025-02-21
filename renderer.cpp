@@ -1,0 +1,35 @@
+#pragma leco app
+
+import scriber;
+import macspeech;
+import pipeline;
+import vee;
+import voo;
+
+static constexpr const vee::extent extent { 1080, 1920 };
+static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
+
+int main() {
+  voo::device_and_queue dq { "panine-render" };
+
+  macspeech ms {};
+
+  voo::offscreen::buffers fb {
+    dq.physical_device(), extent, format, vee::image_layout_color_attachment_optimal
+  };
+  pipeline ppl { &dq, fb.render_pass() };
+
+  voo::single_cb cb { dq.queue_family() };
+  vee::render_pass_begin rpb = fb.render_pass_begin({});
+
+  {
+    voo::cmd_buf_one_time_submit ots { cb.cb() };
+    ppl.run(cb.cb(), rpb, "hello");
+  }
+  dq.queue()->queue_submit({
+    .command_buffer = cb.cb(),
+  });
+  fb.cmd_copy_to_host(cb.cb());
+  
+  vee::device_wait_idle();
+}
