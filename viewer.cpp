@@ -1,5 +1,3 @@
-#pragma leco add_shader "main.vert"
-#pragma leco add_shader "main.frag"
 #pragma leco app
 
 import casein;
@@ -25,7 +23,7 @@ struct init : public vapp {
     main_loop("panine", [&](auto & dq, auto & sw) {
       macspeech ms {};
 
-      pipeline ppl { &dq };
+      pipeline ppl { &dq, dq.render_pass() };
 
       auto movie_run_guard = ppl.play_movie();
 
