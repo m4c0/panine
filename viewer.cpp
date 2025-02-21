@@ -67,11 +67,15 @@ public:
   auto play_movie() { return sith::run_guard { &m_mov }; }
   void next_frame() { m_mov.run_once(); }
 
-  void run(vee::command_buffer cb, vee::extent ext) {
-    float w = ext.width;
-    float h = ext.height;
+  void run(vee::command_buffer cb, vee::render_pass_begin rpb) {
+    rpb.command_buffer = cb;
+    rpb.clear_colours = { vee::clear_colour({}) };
+    voo::cmd_render_pass rp { rpb };
+
+    float w = rpb.extent.width;
+    float h = rpb.extent.height;
     upc pc { .aspect = w / h };
-    m_oqr.run(cb, ext, [&] {
+    m_oqr.run(cb, rpb.extent, [&] {
       vee::cmd_push_fragment_constants(cb, *m_pl, &pc);
       vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset);
     });
@@ -108,13 +112,7 @@ struct init : public vapp {
 
           if (text != cur_text) ppl.shape(*pcb, text);
 
-          {
-            rpb.command_buffer = *pcb;
-            rpb.clear_colours = { vee::clear_colour({}) };
-
-            voo::cmd_render_pass rp { rpb };
-            ppl.run(*pcb, sw.extent());
-          }
+          ppl.run(*pcb, rpb);
 
           if (text != cur_text) {
             ppl.clear_glyphs(*pcb);
