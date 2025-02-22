@@ -14,9 +14,7 @@ int main() {
 
   macspeech ms {};
 
-  voo::offscreen::buffers fb {
-    dq.physical_device(), extent, format, vee::image_layout_color_attachment_optimal
-  };
+  voo::offscreen::buffers fb { dq.physical_device(), extent, format };
   pipeline ppl { &dq, fb.render_pass() };
 
   voo::single_cb cb { dq.queue_family() };
@@ -25,11 +23,11 @@ int main() {
   {
     voo::cmd_buf_one_time_submit ots { cb.cb() };
     ppl.run(cb.cb(), rpb, "hello");
+    fb.cmd_copy_to_host(cb.cb());
   }
   dq.queue()->queue_submit({
     .command_buffer = cb.cb(),
   });
-  fb.cmd_copy_to_host(cb.cb());
   
   vee::device_wait_idle();
 }
