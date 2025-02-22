@@ -34,7 +34,7 @@ int main() {
   voo::single_cb cb { dq.queue_family() };
   vee::render_pass_begin rpb = fb.render_pass_begin({});
 
-  for (auto i = 0; i < 1; i++) {
+  for (auto i = 0; i < 30; i++) {
     {
       voo::cmd_buf_one_time_submit ots { cb.cb() };
       ppl.run(cb.cb(), rpb, "hello");
@@ -55,7 +55,7 @@ int main() {
         out++;
         in++;
       }
-      vo_unlock(vo, 0);
+      vo_unlock(vo, i);
     }
 
     ppl.next_frame();
