@@ -23,7 +23,7 @@ struct init : public vapp {
     main_loop("panine", [&](auto & dq, auto & sw) {
       macspeech ms {};
 
-      pipeline ppl { &dq, dq.render_pass() };
+      pipeline ppl { &dq, dq.render_pass(), true };
 
       auto movie_run_guard = ppl.play_movie();
 

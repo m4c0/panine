@@ -17,10 +17,11 @@ export class mov : public voo::updater<voo::h2l_image> {
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
   void * m_ptr;
+  bool m_realtime {};
 
   void update_data(voo::h2l_image * img) override {
     auto ms = mov_begin_frame(m_ptr);
-    if (ms > m_time.millis()) {
+    if (m_realtime && ms > m_time.millis()) {
       sitime::sleep_ms(ms - m_time.millis());
     }
 
@@ -45,10 +46,12 @@ export class mov : public voo::updater<voo::h2l_image> {
   }
 
 public:
-  mov(vee::physical_device pd, voo::queue * q)
+  mov(vee::physical_device pd, voo::queue * q, bool rt)
     : updater { q, {} }
     , m_pd { pd }
-    , m_ptr { mov_alloc() } {}
+    , m_ptr { mov_alloc() }
+    , m_realtime { rt }
+  {}
   ~mov() { mov_dealloc(m_ptr); }
 
   auto image_view() const { return data().iv(); }

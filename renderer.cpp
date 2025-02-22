@@ -26,7 +26,7 @@ int main() {
   macspeech ms {};
 
   voo::offscreen::buffers fb { dq.physical_device(), extent, format };
-  pipeline ppl { &dq, fb.render_pass() };
+  pipeline ppl { &dq, fb.render_pass(), false };
 
   voo::single_cb cb { dq.queue_family() };
   vee::render_pass_begin rpb = fb.render_pass_begin({});
