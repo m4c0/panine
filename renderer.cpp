@@ -11,12 +11,12 @@ static constexpr const vee::extent extent { 1080, 1920 };
 static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
 
 extern "C" {
-  void * vo_new();
+  void * vo_new(int w, int h);
   void vo_delete(void *);
 }
 
 int main() {
-  auto vo = vo_new();
+  auto vo = vo_new(extent.width, extent.height);
 
   voo::device_and_queue dq { "panine-render" };
 

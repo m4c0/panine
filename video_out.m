@@ -47,12 +47,21 @@
 
     [self.writer addInput:self.vin];
     [self.writer addInput:self.ain];
+    [self.writer startWriting];
+    [self.writer startSessionAtSourceTime:kCMTimeZero];
   }
   return self;
 }
+- (void)dealloc {
+  [self.vin markAsFinished];
+  [self.ain markAsFinished];
+  [self.writer finishWritingWithCompletionHandler:^{ NSLog(@"Movie is done"); }];
+}
 @end
 
-void * vo_new() { return (__bridge_retained void *)[PNNVideoOut new]; }
+void * vo_new(int w, int h) {
+  return (__bridge_retained void *)[[PNNVideoOut alloc] initWithWidth:w height:h];
+}
 void vo_delete(void * p) {
   PNNVideoOut * vo = (__bridge_transfer PNNVideoOut *)p;
   NSLog(@"Deallocating %@", vo);
