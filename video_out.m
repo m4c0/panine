@@ -95,7 +95,6 @@ void * vo_new(int w, int h) {
   return (__bridge_retained void *)[[PNNVideoOut alloc] initWithWidth:w height:h];
 }
 void vo_delete(void * p) {
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
   PNNVideoOut * vo = (__bridge_transfer PNNVideoOut *)p;
   NSLog(@"Deallocating %@", vo);
 }
@@ -105,4 +104,8 @@ unsigned * vo_lock(void * p) {
 }
 void vo_unlock(void * p, unsigned frame) {
   [(__bridge PNNVideoOut *)p unlock:frame];
+}
+
+void vo_wait() {
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:3]];
 }

@@ -8,13 +8,14 @@ import vee;
 import voo;
 
 static constexpr const vee::extent extent { 1080, 1920 };
-static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
+static constexpr const auto format = VK_FORMAT_A8B8G8R8_SRGB_PACK32;
 
 extern "C" {
   void * vo_new(int w, int h);
   void vo_delete(void *);
   unsigned * vo_lock(void * p);
   void vo_unlock(void * p, unsigned frame);
+  void vo_wait();
 }
 
 int main() {
@@ -52,4 +53,5 @@ int main() {
   }
 
   vo_delete(vo);
+  vo_wait();
 }
