@@ -53,7 +53,8 @@
   }
   return self;
 }
-- (void)dealloc {
+
+- (void)done {
   [self.vin markAsFinished];
   [self.ain markAsFinished];
   [self.writer finishWritingWithCompletionHandler:^{ NSLog(@"Movie is done"); }];
@@ -104,6 +105,10 @@ unsigned * vo_lock(void * p) {
 }
 void vo_unlock(void * p, unsigned frame) {
   [(__bridge PNNVideoOut *)p unlock:frame];
+}
+
+void vo_done(void * p) {
+  [(__bridge PNNVideoOut *)p done];
 }
 
 void vo_wait() {

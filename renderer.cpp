@@ -13,6 +13,7 @@ static constexpr const auto format = VK_FORMAT_A8B8G8R8_SRGB_PACK32;
 extern "C" {
   void * vo_new(int w, int h);
   void vo_delete(void *);
+  void vo_done(void *);
   unsigned * vo_lock(void * p);
   void vo_unlock(void * p, unsigned frame);
   void vo_wait();
@@ -31,27 +32,34 @@ int main() {
   voo::single_cb cb { dq.queue_family() };
   vee::render_pass_begin rpb = fb.render_pass_begin({});
 
-  {
-    voo::cmd_buf_one_time_submit ots { cb.cb() };
-    ppl.run(cb.cb(), rpb, "hello");
-    fb.cmd_copy_to_host(cb.cb());
-  }
-  dq.queue()->queue_submit({
-    .command_buffer = cb.cb(),
-  });
-  
-  vee::device_wait_idle();
-
-  {
-    auto mm = fb.map_host();
-    auto * in = static_cast<unsigned *>(*mm);
-    auto * out = vo_lock(vo);
-    for (auto i = 0; i < extent.width * extent.height; i++) {
-      *out++ = *in++;
+  for (auto i = 0; i < 1; i++) {
+    {
+      voo::cmd_buf_one_time_submit ots { cb.cb() };
+      ppl.run(cb.cb(), rpb, "hello");
+      fb.cmd_copy_to_host(cb.cb());
     }
-    vo_unlock(vo, 0);
+    dq.queue()->queue_submit({
+      .command_buffer = cb.cb(),
+    });
+    
+    vee::device_wait_idle();
+
+    {
+      auto mm = fb.map_host();
+      auto * in = static_cast<unsigned *>(*mm);
+      auto * out = vo_lock(vo);
+      for (auto i = 0; i < extent.width * extent.height; i++) {
+        *out++ = *in++;
+      }
+      vo_unlock(vo, 0);
+    }
+
+    ppl.next_frame();
+    vee::device_wait_idle();
   }
+
+  vo_done(vo);
+  vo_wait();
 
   vo_delete(vo);
-  vo_wait();
 }
