@@ -13,6 +13,8 @@ static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
 extern "C" {
   void * vo_new(int w, int h);
   void vo_delete(void *);
+  unsigned * vo_lock(void * p);
+  void vo_unlock(void * p, unsigned frame);
 }
 
 int main() {
@@ -38,6 +40,16 @@ int main() {
   });
   
   vee::device_wait_idle();
+
+  {
+    auto mm = fb.map_host();
+    auto * in = static_cast<unsigned *>(*mm);
+    auto * out = vo_lock(vo);
+    for (auto i = 0; i < extent.width * extent.height; i++) {
+      *out++ = *in++;
+    }
+    vo_unlock(vo, 0);
+  }
 
   vo_delete(vo);
 }

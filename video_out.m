@@ -5,6 +5,7 @@
 @property (nonatomic,strong) AVAssetWriterInput * ain;
 @property (nonatomic,strong) AVAssetWriterInput * vin;
 @property (nonatomic,strong) AVAssetWriterInputPixelBufferAdaptor * vina;
+@property (nonatomic) CVPixelBufferRef buf;
 @end
 
 @implementation PNNVideoOut
@@ -57,12 +58,51 @@
   [self.ain markAsFinished];
   [self.writer finishWritingWithCompletionHandler:^{ NSLog(@"Movie is done"); }];
 }
+
+- (unsigned *)lock {
+  CVPixelBufferRef buf;
+  CVReturn status = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, self.vina.pixelBufferPool, &buf);
+  if (status != kCVReturnSuccess || !buf) {
+    NSLog(@"Failed to acquire pixel buffer with error: %d", status);
+    return nil;
+  }
+  self.buf = buf;
+
+  CVPixelBufferLockBaseAddress(buf, 0);
+  return CVPixelBufferGetBaseAddress(buf);
+}
+- (void)unlock:(unsigned)frame {
+  CVPixelBufferUnlockBaseAddress(self.buf, 0);
+
+  CMTime time = CMTimeMake(frame, 24);
+  for (int i = 0; i < 30; i++) {
+    if (!self.vin.readyForMoreMediaData) {
+      NSLog(@"Buffer wasnt ready");
+      [NSThread sleepForTimeInterval:0.05];
+      continue;
+    }
+  }
+  if (![self.vina appendPixelBuffer:self.buf withPresentationTime:time]) {
+    NSLog(@"Failed to write video frame: %@", self.writer.error);
+    return;
+  }
+  CVBufferRelease(self.buf);
+  self.buf = nil;
+}
 @end
 
 void * vo_new(int w, int h) {
   return (__bridge_retained void *)[[PNNVideoOut alloc] initWithWidth:w height:h];
 }
 void vo_delete(void * p) {
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
   PNNVideoOut * vo = (__bridge_transfer PNNVideoOut *)p;
   NSLog(@"Deallocating %@", vo);
+}
+
+unsigned * vo_lock(void * p) {
+  return [(__bridge PNNVideoOut *)p lock];
+}
+void vo_unlock(void * p, unsigned frame) {
+  [(__bridge PNNVideoOut *)p unlock:frame];
 }
