@@ -14,10 +14,11 @@ extern "C" {
   void ms_write(void * p, const char * w, int n, void * a, void (*)(float));
 }
 
-struct deleter {
-  void operator()(void * p) { ms_deinit(p); }
-};
 export class macspeech {
+  struct deleter {
+    void operator()(void * p) { ms_deinit(p); }
+  };
+
   hai::value_holder<void *, deleter> m_h;
   hai::cstr m_script = jojo::read_cstr("out/script.txt");
 
