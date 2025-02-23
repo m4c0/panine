@@ -11,7 +11,7 @@ extern "C" {
   const char * ms_current(void *);
   bool ms_playing(void *);
   void ms_synth(void *, const char * c, int n);
-  void ms_write(void * p, const char * w, int n, void * a);
+  void ms_write(void * p, const char * w, int n, void * a, void (*)(float));
 }
 
 struct deleter {
@@ -27,7 +27,7 @@ public:
   auto current() const { return jute::view::unsafe(ms_current(*m_h)); }
   bool playing() const { return ms_playing(*m_h); }
   void synth() const { ms_synth(*m_h, m_script.begin(), m_script.size()); }
-  void write(void * ain) const {
-    ms_write(*m_h, m_script.begin(), m_script.size(), ain);
+  void write(void * ain, void (*cb)(float seconds)) const {
+    ms_write(*m_h, m_script.begin(), m_script.size(), ain, cb);
   }
 };

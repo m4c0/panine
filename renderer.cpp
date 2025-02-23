@@ -3,6 +3,7 @@
 
 import macspeech;
 import pipeline;
+import silog;
 import vee;
 import voo;
 
@@ -21,22 +22,22 @@ extern "C" {
   bool vo_wait(void * p);
 }
 
+static auto vo = vo_new(extent.width, extent.height);
+
+static voo::device_and_queue dq { "panine-render" };
+
+static macspeech ms {};
+
+static voo::offscreen::buffers fb { dq.physical_device(), extent, format };
+static pipeline ppl { &dq, fb.render_pass(), false };
+
+static voo::single_cb cb { dq.queue_family() };
+static vee::render_pass_begin rpb = fb.render_pass_begin({});
+
+static int i = 0;
+
 int main() {
-  auto vo = vo_new(extent.width, extent.height);
-
-  voo::device_and_queue dq { "panine-render" };
-
-  macspeech ms {};
-
-  voo::offscreen::buffers fb { dq.physical_device(), extent, format };
-  pipeline ppl { &dq, fb.render_pass(), false };
-
-  voo::single_cb cb { dq.queue_family() };
-  vee::render_pass_begin rpb = fb.render_pass_begin({});
-
-  ms.write(vo_audio(vo));
-  while (ms.playing()) vo_wait(vo);
-  for (auto i = 0; i < 30; i++) {
+  ms.write(vo_audio(vo), [](float seconds) {
     {
       voo::cmd_buf_one_time_submit ots { cb.cb() };
       ppl.run(cb.cb(), rpb, ms.current());
@@ -57,12 +58,13 @@ int main() {
         out++;
         in++;
       }
-      vo_unlock(vo, i);
+      vo_unlock(vo, i++);
     }
 
     ppl.next_frame();
     vee::device_wait_idle();
-  }
+  });
+  while (ms.playing()) vo_wait(vo);
 
   vo_done(vo);
   while (!vo_wait(vo));

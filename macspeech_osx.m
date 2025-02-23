@@ -46,7 +46,7 @@ void ms_synth(void * p, void * w, int n) {
   [(__bridge PNNSynth *)p speakUtterance:create_utt(w, n)];
 }
 
-void ms_write(void * p, void * w, int n, void * a) {
+void ms_write(void * p, void * w, int n, void * a, void (*cb)(float)) {
   AVAssetWriterInput * ain = (__bridge AVAssetWriterInput *)a;
   AVSpeechUtterance * utt = create_utt(w, n);
   [(__bridge PNNSynth *)p writeUtterance:utt toBufferCallback:^(AVAudioBuffer * _Nonnull buffer) {
@@ -93,5 +93,6 @@ void ms_write(void * p, void * w, int n, void * a) {
     CFRelease(fmt);
     CFRelease(smp);
     CFRelease(blk);
+    cb(pcm.frameLength / pcm.format.sampleRate);
   }];
 }
