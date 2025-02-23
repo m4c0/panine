@@ -40,7 +40,7 @@
     opts = @{
       (id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32ARGB),
       (id)kCVPixelBufferWidthKey: @(w),
-      (id)kCVPixelBufferHeightKey: @(h),
+      (id)kCVPixelBufferHeightKey: @(h / 2),
       (id)kCVPixelBufferBytesPerRowAlignmentKey: @(4 * w)
     };
     self.vina = [[AVAssetWriterInputPixelBufferAdaptor alloc] initWithAssetWriterInput:self.vin
