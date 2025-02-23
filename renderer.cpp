@@ -15,6 +15,7 @@ static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
 extern "C" {
   void * vo_new(int w, int h);
   void vo_delete(void *);
+  void * vo_audio(void *);
   void vo_done(void *);
   pix * vo_lock(void * p);
   void vo_unlock(void * p, unsigned frame);
@@ -34,10 +35,12 @@ int main() {
   voo::single_cb cb { dq.queue_family() };
   vee::render_pass_begin rpb = fb.render_pass_begin({});
 
+  ms.write(vo_audio(vo));
+  while (ms.playing()) vo_wait(vo);
   for (auto i = 0; i < 30; i++) {
     {
       voo::cmd_buf_one_time_submit ots { cb.cb() };
-      ppl.run(cb.cb(), rpb, "hello");
+      ppl.run(cb.cb(), rpb, ms.current());
       fb.cmd_copy_to_host(cb.cb());
     }
     dq.queue()->queue_submit({

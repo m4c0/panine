@@ -103,6 +103,10 @@ void vo_delete(void * p) {
   NSLog(@"Deallocating %@", vo);
 }
 
+void * vo_audio(void * p) {
+  return (__bridge void *)[(__bridge PNNVideoOut *)p ain];
+}
+
 unsigned * vo_lock(void * p) {
   return [(__bridge PNNVideoOut *)p lock];
 }
