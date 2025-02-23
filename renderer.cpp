@@ -1,7 +1,6 @@
 #pragma leco app
 #pragma leco add_impl video_out
 
-import scriber;
 import macspeech;
 import pipeline;
 import vee;
