@@ -18,7 +18,7 @@ extern "C" {
   void vo_done(void *);
   pix * vo_lock(void * p);
   void vo_unlock(void * p, unsigned frame);
-  void vo_wait();
+  bool vo_wait(void * p);
 }
 
 int main() {
@@ -63,7 +63,7 @@ int main() {
   }
 
   vo_done(vo);
-  vo_wait();
+  while (!vo_wait(vo));
 
   vo_delete(vo);
 }

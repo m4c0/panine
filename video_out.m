@@ -6,6 +6,7 @@
 @property (nonatomic,strong) AVAssetWriterInput * vin;
 @property (nonatomic,strong) AVAssetWriterInputPixelBufferAdaptor * vina;
 @property (nonatomic) CVPixelBufferRef buf;
+@property (nonatomic) bool actuallyFinished;
 @end
 
 @implementation PNNVideoOut
@@ -57,7 +58,9 @@
 - (void)done {
   [self.vin markAsFinished];
   [self.ain markAsFinished];
-  [self.writer finishWritingWithCompletionHandler:^{ NSLog(@"Movie is done"); }];
+  [self.writer finishWritingWithCompletionHandler:^{
+    self.actuallyFinished = YES;
+  }];
 }
 
 - (unsigned *)lock {
@@ -111,6 +114,7 @@ void vo_done(void * p) {
   [(__bridge PNNVideoOut *)p done];
 }
 
-void vo_wait() {
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:3]];
+bool vo_wait(void * p) {
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  return [(__bridge PNNVideoOut *)p actuallyFinished];
 }
