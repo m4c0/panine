@@ -141,7 +141,10 @@ void vo_write_audio(void * p, void * buffer, int count) {
   asbd.mBitsPerChannel = 32;
   asbd.mBytesPerFrame = 4;
   asbd.mBytesPerPacket = 4;
-  asbd.mFormatFlags = kAudioFormatFlagIsFloat;
+  asbd.mFormatFlags =
+    kAudioFormatFlagIsNonInterleaved |
+    kAudioFormatFlagIsPacked |
+    kAudioFormatFlagIsFloat;
 
   CMFormatDescriptionRef fmt;
   CMAudioFormatDescriptionCreate(kCFAllocatorDefault, &asbd, 0, NULL, 0, NULL, NULL, &fmt);
