@@ -30,9 +30,9 @@
 
     opts = @{
       AVFormatIDKey: @(kAudioFormatMPEG4AAC),
-      AVSampleRateKey: @44100,
+      AVSampleRateKey: @22050,
       AVNumberOfChannelsKey: @1,
-      AVEncoderBitRateKey: @128000
+      // AVEncoderBitRateKey: @128000
     };
     self.ain = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio
                                                   outputSettings:opts];
@@ -78,7 +78,7 @@
 - (void)unlock:(unsigned)frame {
   CVPixelBufferUnlockBaseAddress(self.buf, 0);
 
-  CMTime time = CMTimeMake(frame, 24);
+  CMTime time = CMTimeMake(frame, 30);
   for (int i = 0; i < 30; i++) {
     if (!self.vin.readyForMoreMediaData) {
       NSLog(@"Buffer wasnt ready");
@@ -134,7 +134,7 @@ void vo_write_audio(void * p, void * buffer, int count) {
   );
 
   AudioStreamBasicDescription asbd;
-  asbd.mSampleRate = 44100;
+  asbd.mSampleRate = 22050;
   asbd.mFormatID = kAudioFormatLinearPCM;
   asbd.mChannelsPerFrame = 1;
   asbd.mFramesPerPacket = 1;
