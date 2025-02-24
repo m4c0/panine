@@ -26,9 +26,11 @@ extern "C" void speak_callback(float * data, unsigned samples) {
 }
 extern "C" void speak_marker_callback(const char * str, unsigned offset) {
   if (str == nullptr) str = "";
+  offset /= 4; // 4 bytes per sample
+  offset = offset * 1000 / 44100; // sample to ms
   spk::words.push_back(spk::word {
     .text { jute::view::unsafe(str) },
-    .offset = offset / 4,
+    .offset = offset,
   });
 }
 
