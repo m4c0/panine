@@ -103,10 +103,6 @@ void vo_delete(void * p) {
   NSLog(@"Deallocating %@", vo);
 }
 
-void * vo_audio(void * p) {
-  return (__bridge void *)[(__bridge PNNVideoOut *)p ain];
-}
-
 unsigned * vo_lock(void * p) {
   return [(__bridge PNNVideoOut *)p lock];
 }
@@ -121,4 +117,43 @@ void vo_done(void * p) {
 bool vo_wait(void * p) {
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
   return [(__bridge PNNVideoOut *)p actuallyFinished];
+}
+
+void vo_write_audio(void * p, void * buffer, int count) {
+  CMBlockBufferRef blk;
+  CMBlockBufferCreateWithMemoryBlock(
+    kCFAllocatorDefault,
+    buffer,
+    count * sizeof(float),
+    kCFAllocatorNull,
+    NULL,
+    0,
+    count * sizeof(float),
+    kCMBlockBufferAssureMemoryNowFlag,
+    &blk
+  );
+
+  AudioStreamBasicDescription asbd;
+  asbd.mSampleRate = 44100;
+  asbd.mFormatID = kAudioFormatLinearPCM;
+  asbd.mChannelsPerFrame = 1;
+  asbd.mFramesPerPacket = 1;
+  asbd.mBitsPerChannel = 32;
+  asbd.mBytesPerFrame = 4;
+  asbd.mBytesPerPacket = 4;
+  asbd.mFormatFlags = kAudioFormatFlagIsFloat;
+
+  CMFormatDescriptionRef fmt;
+  CMAudioFormatDescriptionCreate(kCFAllocatorDefault, &asbd, 0, NULL, 0, NULL, NULL, &fmt);
+
+  CMSampleBufferRef smp;
+  CMSampleBufferCreate(kCFAllocatorDefault, blk, YES, NULL, NULL, fmt, count, 0, NULL, 0, NULL, &smp);
+  if (![[(__bridge PNNVideoOut *)p ain] appendSampleBuffer:smp]) {
+    NSLog(@"aw.error");
+    return;
+  }
+
+  CFRelease(fmt);
+  CFRelease(smp);
+  CFRelease(blk);
 }

@@ -21,6 +21,7 @@ int main() {
   vee::render_pass_begin rpb = fb.render_pass_begin({});
  
   vo v {};
+  v.write_audio(spk::buffer.begin(), spk::buffer.size());
  
   int frame = 0;
   for (auto & w : spk::words) {

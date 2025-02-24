@@ -12,8 +12,8 @@ export namespace spk {
     unsigned offset;
   };
   
-  hai::chain<float> buffer { 4 * 1024 * 1024 };
-  hai::chain<word> words { 16 * 1024 };
+  hai::varray<float> buffer { 4 * 1024 * 1024 };
+  hai::varray<word> words { 16 * 1024 };
 
   void run() {
     auto script = jojo::read_cstr("out/script.txt");
