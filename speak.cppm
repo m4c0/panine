@@ -17,7 +17,9 @@ export namespace spk {
 
   void run() {
     auto script = jojo::read_cstr("out/script.txt");
+    words.push_back(word { jute::view { "" }, 0 });
     speak(script.begin(), script.size());
+    (words.end() - 1)->offset = buffer.size();
   }
 }
 
@@ -27,7 +29,7 @@ extern "C" void speak_callback(float * data, unsigned samples) {
 extern "C" void speak_marker_callback(const char * str, unsigned offset) {
   if (str == nullptr) str = "";
   offset /= 4; // 4 bytes per sample
-  offset = offset * 1000 / 44100; // sample to ms
+  (spk::words.end() - 1)->offset = offset;
   spk::words.push_back(spk::word {
     .text { jute::view::unsafe(str) },
     .offset = offset,

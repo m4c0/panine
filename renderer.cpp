@@ -26,7 +26,8 @@ int main() {
   int frame = 0;
   for (auto & w : spk::words) {
     silog::trace("generate", w.text);
-    for (; frame < w.offset * 30 / 1000; frame++) {
+    auto count = w.offset * 30 / 22050;
+    for (; frame < count; frame++) {
       {
         voo::cmd_buf_one_time_submit ots { cb.cb() };
         ppl.run(cb.cb(), rpb, *w.text);
