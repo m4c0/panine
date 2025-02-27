@@ -1,12 +1,13 @@
 #pragma leco add_impl mov_impl
 export module mov;
+import jute;
 import silog;
 import sitime;
 import vee;
 import voo;
 
 extern "C" {
-  void * mov_alloc();
+  void * mov_alloc(const char * path, unsigned plen);
   void mov_dealloc(void *);
   int mov_begin_frame(void * m);
   unsigned * mov_frame(void * m, int * w, int * h);
@@ -14,6 +15,8 @@ extern "C" {
 }
 
 export class mov : public voo::updater<voo::h2l_image> {
+  static constexpr jute::view path = "out/IMG_2451.MOV";
+
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
   void * m_ptr;
@@ -49,7 +52,7 @@ public:
   mov(vee::physical_device pd, voo::queue * q, bool rt)
     : updater { q, {} }
     , m_pd { pd }
-    , m_ptr { mov_alloc() }
+    , m_ptr { mov_alloc(path.begin(), path.size()) }
     , m_realtime { rt }
   {}
   ~mov() { mov_dealloc(m_ptr); }

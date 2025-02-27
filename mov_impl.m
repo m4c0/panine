@@ -11,10 +11,14 @@
 @implementation PNNMovie
 @end
 
-void * mov_alloc() {
+void * mov_alloc(void * pstr, unsigned plen) {
   PNNMovie * res = [PNNMovie new];
 
-  NSURL * url = [NSURL fileURLWithPath:@"out/IMG_2450.MOV"];
+  NSString * path = [[NSString alloc] initWithBytesNoCopy:pstr
+                                                   length:plen
+                                                 encoding:NSASCIIStringEncoding
+                                             freeWhenDone:false];
+  NSURL * url = [NSURL fileURLWithPath:path];
   res.mov = [AVMovie movieWithURL:url options:nil];
 
   NSDictionary * opts = @{
