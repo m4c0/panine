@@ -144,13 +144,11 @@ public:
     , m_c0 { dq.physical_device(), ext, VK_FORMAT_R8G8B8A8_SRGB, vee::image_usage_sampled }
     , m_c1 { dq.physical_device(), ext, VK_FORMAT_R8G8B8A8_SRGB, vee::image_usage_sampled }
     , m_fb0 { vee::create_framebuffer({
-      .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
       .attachments = {{ m_c0.image_view() }},
       .extent = ext,
     }) }
     , m_fb1 { vee::create_framebuffer({
-      .physical_device = dq.physical_device(),
       .render_pass = *m_rp,
       .attachments = {{ m_c1.image_view() }},
       .extent = ext,
