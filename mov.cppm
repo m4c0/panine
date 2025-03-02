@@ -1,5 +1,6 @@
 #pragma leco add_impl mov_impl
 export module mov;
+import hai;
 import jute;
 import silog;
 import sitime;
@@ -14,23 +15,27 @@ extern "C" {
   void mov_end_frame(void * m);
 }
 
+template<typename T, void (*F)(T)>
+struct del { void operator()(T t) { F(t); } };
+using mov_ptr = hai::value_holder<void *, del<void *, mov_dealloc>>;
+  
 export class mov : public voo::updater<voo::h2l_image> {
   static constexpr jute::view path = "out/IMG_2450.MOV";
 
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
-  void * m_ptr;
+  mov_ptr m_ptr;
   bool m_realtime {};
   unsigned m_frames {};
 
   void update_data(voo::h2l_image * img) override {
-    auto ms = mov_begin_frame(m_ptr);
+    auto ms = mov_begin_frame(*m_ptr);
     if (m_realtime && ms > m_time.millis()) {
       sitime::sleep_ms(ms - m_time.millis());
     }
 
     int w, h;
-    auto ptr = mov_frame(m_ptr, &w, &h);
+    auto ptr = mov_frame(*m_ptr, &w, &h);
     if (img->width() != w || img->height() != h) {
       silog::log(silog::info, "new image with %dx%d", w, h);
       *img = voo::h2l_image {
@@ -46,7 +51,7 @@ export class mov : public voo::updater<voo::h2l_image> {
       *mem++ = *ptr++;
     }
 
-    mov_end_frame(m_ptr);
+    mov_end_frame(*m_ptr);
     m_frames++;
   }
 
@@ -60,7 +65,6 @@ public:
   ~mov() {
     float time = m_frames / 30.0;
     silog::log(silog::info, "Total frames played: %d (%3.2fs)", m_frames, time);
-    mov_dealloc(m_ptr);
   }
 
   auto image_view() const { return data().iv(); }
