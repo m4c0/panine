@@ -15,12 +15,13 @@ extern "C" {
 }
 
 export class mov : public voo::updater<voo::h2l_image> {
-  static constexpr jute::view path = "out/IMG_2451.MOV";
+  static constexpr jute::view path = "out/IMG_2450.MOV";
 
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
   void * m_ptr;
   bool m_realtime {};
+  unsigned m_frames {};
 
   void update_data(voo::h2l_image * img) override {
     auto ms = mov_begin_frame(m_ptr);
@@ -46,6 +47,7 @@ export class mov : public voo::updater<voo::h2l_image> {
     }
 
     mov_end_frame(m_ptr);
+    m_frames++;
   }
 
 public:
@@ -55,7 +57,11 @@ public:
     , m_ptr { mov_alloc(path.begin(), path.size()) }
     , m_realtime { rt }
   {}
-  ~mov() { mov_dealloc(m_ptr); }
+  ~mov() {
+    float time = m_frames / 30.0;
+    silog::log(silog::info, "Total frames played: %d (%3.2fs)", m_frames, time);
+    mov_dealloc(m_ptr);
+  }
 
   auto image_view() const { return data().iv(); }
 };
