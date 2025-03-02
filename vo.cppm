@@ -15,12 +15,8 @@ extern "C" {
   void vo_write_audio(void * p, void * buffer, int);
 }
 
-struct deleter {
-  void operator()(void * p) { vo_delete(p); }
-};
-
 export class vo {
-  hai::value_holder<void *, deleter> m_h {};
+  hai::value<void *, vo_delete> m_h {};
 
 public:
   static constexpr const vee::extent extent { 1080, 1920 };

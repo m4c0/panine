@@ -15,16 +15,12 @@ extern "C" {
   void mov_end_frame(void * m);
 }
 
-template<typename T, void (*F)(T)>
-struct del { void operator()(T t) { F(t); } };
-using mov_ptr = hai::value_holder<void *, del<void *, mov_dealloc>>;
-  
 export class mov : public voo::updater<voo::h2l_image> {
   static constexpr jute::view path = "out/IMG_2450.MOV";
 
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
-  mov_ptr m_ptr;
+  hai::value<void *, mov_dealloc> m_ptr;
   bool m_realtime {};
   unsigned m_frames {};
 
