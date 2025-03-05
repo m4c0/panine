@@ -1,6 +1,7 @@
 #pragma leco app
 
 import jojo;
+import jute;
 import pipeline;
 import speak;
 import silog;
@@ -8,9 +9,11 @@ import vee;
 import vo;
 import voo;
 
-int main() {
-  voo::device_and_queue dq { "panine-render" };
- 
+static voo::device_and_queue dq { "panine-render" };
+static vo v {};
+static int vframes {};
+
+static void render(jute::view script) {
   constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
   voo::offscreen::buffers fb { dq.physical_device(), vo::extent, format };
   pipeline ppl { &dq, fb.render_pass(), false };
@@ -18,9 +21,7 @@ int main() {
   voo::single_cb cb { dq.queue_family() };
   vee::render_pass_begin rpb = fb.render_pass_begin({});
  
-  vo v {};
-
-  auto spk = spk::run(jojo::read_cstr("out/script.txt"));
+  auto spk = spk::run(script);
   v.write_audio(spk.buffer.begin(), spk.buffer.size());
  
   int frame = 0;
@@ -48,13 +49,25 @@ int main() {
           out++;
           in++;
         }
-        v.unlock(frame);
+        v.unlock(vframes++);
       }
 
       ppl.next_frame();
       vee::device_wait_idle();
     }
   }
+}
+
+int main() {
+  //render(jojo::read_cstr("out/script.txt"));
+  render("Five reasons to test this.");
+  render("First, I love it.");
+  render("Second, I really love it.");
+  render("Third, who would not love it?");
+ 
+  float time = vframes / 30.0;
+  silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
+
   v.done();
   while (!v.wait());
 }
