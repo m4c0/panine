@@ -4,7 +4,7 @@ import hai;
 import jojo;
 import jute;
 
-extern "C" void speak(const char * txt, unsigned n);
+extern "C" void speak(void * self, const char * txt, unsigned n);
 
 export namespace spk {
   struct word {
@@ -18,15 +18,15 @@ export namespace spk {
   void run() {
     auto script = jojo::read_cstr("out/script.txt");
     words.push_back(word { jute::view { "" }, 0 });
-    speak(script.begin(), script.size());
+    speak(nullptr, script.begin(), script.size());
     (words.end() - 1)->offset = buffer.size();
   }
 }
 
-extern "C" void speak_callback(float * data, unsigned samples) {
+extern "C" void speak_callback(void * self, float * data, unsigned samples) {
   for (auto i = 0; i < samples; i++) spk::buffer.push_back(data[i]);
 }
-extern "C" void speak_marker_callback(const char * str, unsigned offset) {
+extern "C" void speak_marker_callback(void * self, const char * str, unsigned offset) {
   if (str == nullptr) str = "";
   offset /= 4; // 4 bytes per sample
   (spk::words.end() - 1)->offset = offset;
