@@ -6,31 +6,37 @@ import jute;
 
 extern "C" void speak(void * self, const char * txt, unsigned n);
 
-export namespace spk {
-  struct word {
+namespace spk {
+  export struct word {
     jute::heap text;
     unsigned offset;
   };
   
-  hai::varray<float> buffer { 4 * 1024 * 1024 };
-  hai::varray<word> words { 16 * 1024 };
+  struct buffers {
+    hai::varray<float> buffer { 4 * 1024 * 1024 };
+    hai::varray<word> words { 16 * 1024 };
+  };
 
-  void run() {
+  export [[nodiscard]] auto run() {
+    buffers b {};
+
     auto script = jojo::read_cstr("out/script.txt");
-    words.push_back(word { jute::view { "" }, 0 });
-    speak(nullptr, script.begin(), script.size());
-    (words.end() - 1)->offset = buffer.size();
+    b.words.push_back(word { jute::view { "" }, 0 });
+    speak(&b, script.begin(), script.size());
+    (b.words.end() - 1)->offset = b.buffer.size();
+
+    return b;
   }
 }
 
-extern "C" void speak_callback(void * self, float * data, unsigned samples) {
-  for (auto i = 0; i < samples; i++) spk::buffer.push_back(data[i]);
+extern "C" void speak_callback(spk::buffers * b, float * data, unsigned samples) {
+  for (auto i = 0; i < samples; i++) b->buffer.push_back(data[i]);
 }
-extern "C" void speak_marker_callback(void * self, const char * str, unsigned offset) {
+extern "C" void speak_marker_callback(spk::buffers * b, const char * str, unsigned offset) {
   if (str == nullptr) str = "";
   offset /= 4; // 4 bytes per sample
-  (spk::words.end() - 1)->offset = offset;
-  spk::words.push_back(spk::word {
+  (b->words.end() - 1)->offset = offset;
+  b->words.push_back(spk::word {
     .text { jute::view::unsafe(str) },
     .offset = offset,
   });

@@ -8,8 +8,8 @@ import vo;
 import voo;
 
 int main() {
-  spk::run();
-  silog::log(silog::info, "generated %d words and %d samples", spk::words.size(), spk::buffer.size());
+  auto spk = spk::run();
+  silog::log(silog::info, "generated %d words and %d samples", spk.words.size(), spk.buffer.size());
 
   voo::device_and_queue dq { "panine-render" };
  
@@ -21,10 +21,10 @@ int main() {
   vee::render_pass_begin rpb = fb.render_pass_begin({});
  
   vo v {};
-  v.write_audio(spk::buffer.begin(), spk::buffer.size());
+  v.write_audio(spk.buffer.begin(), spk.buffer.size());
  
   int frame = 0;
-  for (auto & w : spk::words) {
+  for (auto & w : spk.words) {
     silog::trace("generate", w.text);
     auto count = w.offset * 30 / 22050;
     for (; frame < count; frame++) {
