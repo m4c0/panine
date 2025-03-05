@@ -9,7 +9,6 @@ import voo;
 
 int main() {
   auto spk = spk::run();
-  silog::log(silog::info, "generated %d words and %d samples", spk.words.size(), spk.buffer.size());
 
   voo::device_and_queue dq { "panine-render" };
  

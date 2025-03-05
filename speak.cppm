@@ -3,6 +3,7 @@ export module speak;
 import hai;
 import jojo;
 import jute;
+import silog;
 
 extern "C" void speak(void * self, const char * txt, unsigned n);
 
@@ -24,6 +25,8 @@ namespace spk {
     b.words.push_back(word { jute::view { "" }, 0 });
     speak(&b, script.begin(), script.size());
     (b.words.end() - 1)->offset = b.buffer.size();
+
+    silog::log(silog::info, "generated %d words and %d samples", b.words.size(), b.buffer.size());
 
     return b;
   }
