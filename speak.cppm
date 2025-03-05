@@ -1,4 +1,4 @@
-#pragma leco add_impl avspeech
+#pragma leco add_impl speak_objc
 export module speak;
 import hai;
 import jojo;
