@@ -16,8 +16,6 @@ extern "C" {
 }
 
 export class mov : public voo::updater<voo::h2l_image> {
-  static constexpr jute::view path = "out/IMG_2450.MOV";
-
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
   hai::value<void *, mov_dealloc> m_ptr;
@@ -52,7 +50,7 @@ export class mov : public voo::updater<voo::h2l_image> {
   }
 
 public:
-  mov(vee::physical_device pd, voo::queue * q, bool rt)
+  mov(jute::view path, vee::physical_device pd, voo::queue * q, bool rt)
     : updater { q, {} }
     , m_pd { pd }
     , m_ptr { mov_alloc(path.begin(), path.size()) }

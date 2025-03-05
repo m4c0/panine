@@ -13,10 +13,10 @@ static voo::device_and_queue dq { "panine-render" };
 static vo v {};
 static int vframes {};
 
-static void render(jute::view script) {
+static void render(jute::view bg, jute::view script) {
   constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
   voo::offscreen::buffers fb { dq.physical_device(), vo::extent, format };
-  pipeline ppl { &dq, fb.render_pass(), false };
+  pipeline ppl { bg, &dq, fb.render_pass(), false };
  
   voo::single_cb cb { dq.queue_family() };
   vee::render_pass_begin rpb = fb.render_pass_begin({});
@@ -60,10 +60,10 @@ static void render(jute::view script) {
 
 int main() {
   //render(jojo::read_cstr("out/script.txt"));
-  render("Five reasons to test this.");
-  render("First, I love it.");
-  render("Second, I really love it.");
-  render("Third, who would not love it?");
+  render("out/IMG_2450.MOV", "Five reasons to test this.");
+  render("out/IMG_2451.MOV", "First, I love it.");
+  render("out/IMG_2450.MOV", "Second, I really love it.");
+  render("out/IMG_2451.MOV", "Third, who would not love it?");
  
   float time = vframes / 30.0;
   silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
