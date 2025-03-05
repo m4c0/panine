@@ -1,4 +1,4 @@
-#pragma leco add_impl video_out
+#pragma leco add_impl vo_objc
 export module vo;
 import hai;
 import vee;
