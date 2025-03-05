@@ -1,5 +1,6 @@
 #pragma leco app
 
+import jojo;
 import pipeline;
 import speak;
 import silog;
@@ -8,8 +9,6 @@ import vo;
 import voo;
 
 int main() {
-  auto spk = spk::run();
-
   voo::device_and_queue dq { "panine-render" };
  
   constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
@@ -20,6 +19,8 @@ int main() {
   vee::render_pass_begin rpb = fb.render_pass_begin({});
  
   vo v {};
+
+  auto spk = spk::run(jojo::read_cstr("out/script.txt"));
   v.write_audio(spk.buffer.begin(), spk.buffer.size());
  
   int frame = 0;

@@ -1,7 +1,6 @@
 #pragma leco add_impl speak_objc
 export module speak;
 import hai;
-import jojo;
 import jute;
 import silog;
 
@@ -18,10 +17,9 @@ namespace spk {
     hai::varray<word> words { 16 * 1024 };
   };
 
-  export [[nodiscard]] auto run() {
+  export [[nodiscard]] auto run(jute::view script) {
     buffers b {};
 
-    auto script = jojo::read_cstr("out/script.txt");
     b.words.push_back(word { jute::view { "" }, 0 });
     speak(&b, script.begin(), script.size());
     (b.words.end() - 1)->offset = b.buffer.size();
