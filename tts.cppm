@@ -1,6 +1,6 @@
-#pragma leco add_shader "main.vert"
-#pragma leco add_shader "main.frag"
-export module pipeline;
+#pragma leco add_shader "tts.vert"
+#pragma leco add_shader "tts.frag"
+export module tts;
 import jute;
 import mov;
 import sith;
@@ -15,7 +15,7 @@ struct upc {
   float aspect;
 };
 
-export class pipeline {
+export class tts {
   vee::descriptor_set_layout m_dsl = vee::create_descriptor_set_layout({
     vee::dsl_fragment_sampler(),
     vee::dsl_fragment_sampler(),
@@ -52,8 +52,8 @@ export class pipeline {
   }
 
 public:
-  pipeline(jute::view path, voo::device_and_queue * dq, vee::render_pass::type rp, bool rt)
-    : m_oqr { "main", dq->physical_device(), rp, *m_pl }
+  tts(jute::view path, voo::device_and_queue * dq, vee::render_pass::type rp, bool rt)
+    : m_oqr { "tts", dq->physical_device(), rp, *m_pl }
     , m_scr { *dq, { 1024, 1024 } }
     , m_mov { path, dq->physical_device(), dq->queue(), rt }
   {

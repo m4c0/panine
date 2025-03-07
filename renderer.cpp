@@ -2,9 +2,9 @@
 
 import jojo;
 import jute;
-import pipeline;
 import speak;
 import silog;
+import tts;
 import vee;
 import vo;
 import voo;
@@ -41,7 +41,7 @@ static void ots(auto fn) {
 }
 
 static void run_speech(jute::view bg, jute::view script) {
-  pipeline ppl { bg, &dq, fb.render_pass(), false };
+  tts ppl { bg, &dq, fb.render_pass(), false };
  
   auto spk = spk::run(script);
   v.write_audio(spk.buffer.begin(), spk.buffer.size());
