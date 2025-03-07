@@ -45,6 +45,10 @@ public:
   }
 
   void run(vee::command_buffer cb, const voo::swapchain_and_stuff & sw) {
+    auto scb = sw.cmd_render_pass({
+      .command_buffer = cb,
+      .clear_colours { vee::clear_colour({}) },
+    });
     m_oqr.run(cb, sw.extent(), [&] {
       upc pc {};
       pc.scale = { sw.aspect(), 1.0 };
@@ -64,10 +68,6 @@ struct app : vapp {
   void loop(voo::device_and_queue & dq, voo::swapchain_and_stuff & sw) {
     breakimg b { dq };
     ots_loop(dq, sw, [&](auto cb) {
-      auto scb = sw.cmd_render_pass({
-        .command_buffer = cb,
-        .clear_colours { vee::clear_colour({}) },
-      });
       b.run(cb, sw);
     });
   }
