@@ -43,7 +43,11 @@ struct app : vapp {
     );
     voo::one_quad_render m_oqr { "breakimg", &dq, *m_pl };
 
-    render_loop(dq, sw, [&](auto cb) {
+    ots_loop(dq, sw, [&](auto cb) {
+      auto scb = sw.cmd_render_pass({
+        .command_buffer = cb,
+        .clear_colours { vee::clear_colour({}) },
+      });
       m_oqr.run(cb, sw.extent(), [&] {
         upc pc {};
         pc.scale.x = sw.aspect();
