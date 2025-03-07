@@ -3,9 +3,14 @@
 #pragma leco add_shader "breakimg.vert"
 export module breakimg;
 import casein;
+import dotz;
 import vapp;
 import vee;
 import voo;
+
+struct upc {
+  dotz::vec2 scale { 1, 1 };
+};
 
 export class breakimg {
 public:
@@ -32,11 +37,18 @@ struct app : vapp {
     vee::sampler m_smp = vee::create_sampler(vee::linear_sampler);
     vee::update_descriptor_set(m_dset.descriptor_set(), 0, m_img.iv(), *m_smp);
 
-    vee::pipeline_layout m_pl = vee::create_pipeline_layout({ m_dset.descriptor_set_layout() });
+    vee::pipeline_layout m_pl = vee::create_pipeline_layout(
+      { m_dset.descriptor_set_layout() },
+      { vee::vertex_push_constant_range<upc>() }
+    );
     voo::one_quad_render m_oqr { "breakimg", &dq, *m_pl };
 
     render_loop(dq, sw, [&](auto cb) {
       m_oqr.run(cb, sw.extent(), [&] {
+        upc pc {};
+        pc.scale.x = sw.aspect();
+
+        vee::cmd_push_vertex_constants(cb, *m_pl, &pc);
         vee::cmd_bind_descriptor_set(cb, *m_pl, 0, m_dset.descriptor_set());
       });
     });
