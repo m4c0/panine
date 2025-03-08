@@ -83,7 +83,6 @@ static void run_speech(jute::view bg, jute::view script) {
 extern "C" void read_audio_file(const char * fn, float * out, int count);
 static void show_image() {
   breakimg b { "out/assets/jacked.jpg", dq, fb.render_pass() };
-  // pipeline ppl { bg, &dq, fb.render_pass(), false };
   for (int frame = 0; frame < 30; frame++) {
     float t = static_cast<float>(frame) / 30.0f;
     ots([&] {
@@ -93,9 +92,10 @@ static void show_image() {
     });
   }
 
-  float audio[audio_rate * 2] {};
-  read_audio_file("out/assets/jacked.m4a", audio, audio_rate * 2);
-  v.write_audio(audio, audio_rate);
+  float audio[audio_rate * 5] {};
+  read_audio_file("out/assets/jacked.m4a", audio, audio_rate * 5);
+  for (auto & f : audio) f *= 3.5;
+  v.write_audio(audio + 10000, audio_rate);
 }
 
 int main() {
