@@ -20,8 +20,8 @@ public:
     dotz::vec2 scale;
   };
 
-  explicit breakimg(voo::device_and_queue & dq, vee::render_pass::type rp)
-    : m_img { voo::load_image_file("out/assets/smart.jpg", dq.physical_device()) }
+  explicit breakimg(const char * file, voo::device_and_queue & dq, vee::render_pass::type rp)
+    : m_img { voo::load_image_file(file, dq.physical_device()) }
     , m_cb { dq.queue_family() }
     , m_dset { 
       vee::dsl_fragment_sampler(),

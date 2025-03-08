@@ -1,9 +1,11 @@
 @import AVFoundation;
 
-void read_audio_file(float * out, int count) {
+void read_audio_file(const char * fn, float * out, int count) {
   NSError * err;
 
-  NSURL * url = [NSURL fileURLWithPath:@"out/assets/shrug.m4a"];
+  NSString * name = [NSString stringWithUTF8String:fn];
+
+  NSURL * url = [NSURL fileURLWithPath:name];
   AVAudioFile * file = [[AVAudioFile alloc] initForReading:url error:&err];
   if (err) NSLog(@"%@", err);
 
