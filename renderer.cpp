@@ -18,6 +18,7 @@ static voo::device_and_queue dq { "panine-render" };
 static vo v {};
 static int vframes {};
 
+static constexpr const auto audio_rate = 22050; // defined by Apple's TTS
 static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
 static voo::offscreen::buffers fb { dq.physical_device(), vo::extent, format };
 static voo::single_cb cb { dq.queue_family() };
@@ -66,7 +67,7 @@ static void run_speech(jute::view bg, jute::view script) {
   int frame = 0;
   for (auto & w : spk.words) {
     silog::trace("generate", w.text);
-    auto count = w.offset * 30 / 22050;
+    auto count = w.offset * 30 / audio_rate;
     for (; frame < count; frame++) {
       ots([&] {
         ppl.run(cb.cb(), rpb, *w.text);
@@ -89,6 +90,9 @@ static void show_image() {
       b.run(cb.cb(), rpb, pc);
     });
   }
+
+  float audio[audio_rate * 2] { 0 };
+  v.write_audio(audio, audio_rate);
 }
 
 int main() {
