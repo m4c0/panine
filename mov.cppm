@@ -55,7 +55,9 @@ public:
     , m_pd { pd }
     , m_ptr { mov_alloc(path.begin(), path.size()) }
     , m_realtime { rt }
-  {}
+  {
+    silog::log(silog::info, "Loaded movie [%.*s]", static_cast<unsigned>(path.size()), path.begin());
+  }
   ~mov() {
     float time = m_frames / 30.0;
     silog::log(silog::info, "Total frames played: %d (%3.2fs)", m_frames, time);
