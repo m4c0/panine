@@ -2,8 +2,11 @@
 
 import breakimg;
 import dotz;
+import hai;
 import jojo;
 import jute;
+import pprent;
+import rng;
 import speak;
 import silog;
 import tts;
@@ -19,6 +22,18 @@ static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
 static voo::offscreen::buffers fb { dq.physical_device(), vo::extent, format };
 static voo::single_cb cb { dq.queue_family() };
 static vee::render_pass_begin rpb = fb.render_pass_begin({});
+
+static auto random_movie() {
+  hai::chain<jute::heap> files { 1024 };
+  for (auto d : pprent::list("out/assets")) {
+    auto dv = jute::view::unsafe(d);
+    if (!dv.ends_with(".mov")) continue;
+
+    auto dh = jute::heap { "out/assets" } + "/" + dv;
+    files.push_back(dh);
+  }
+  return files.seek(rng::rand(files.size()));
+}
 
 static void ots(auto fn) {
   {
@@ -77,14 +92,16 @@ static void show_image() {
 }
 
 int main() {
+  rng::seed();
+
   //run_speech(jojo::read_cstr("out/script.txt"));
-  run_speech("out/IMG_2450.MOV", "Five reasons to test this.");
+  run_speech(*random_movie(), "Five reasons to test this.");
   show_image();
-  run_speech("out/IMG_2451.MOV", "First, I love it.");
+  run_speech(*random_movie(), "First, I love it.");
   show_image();
-  run_speech("out/IMG_2450.MOV", "Second, I really love it.");
+  run_speech(*random_movie(), "Second, I really love it.");
   show_image();
-  run_speech("out/IMG_2451.MOV", "Third, who would not love it?");
+  run_speech(*random_movie(), "Third, who would not love it?");
  
   float time = vframes / 30.0;
   silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
