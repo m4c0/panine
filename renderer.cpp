@@ -1,4 +1,5 @@
 #pragma leco app
+#pragma leco add_impl "renderer_objc"
 
 import breakimg;
 import dotz;
@@ -79,6 +80,7 @@ static void run_speech(jute::view bg, jute::view script) {
   }
 }
 
+extern "C" void read_audio_file(float * out, int count);
 static void show_image() {
   breakimg b { dq, fb.render_pass() };
   // pipeline ppl { bg, &dq, fb.render_pass(), false };
@@ -91,7 +93,8 @@ static void show_image() {
     });
   }
 
-  float audio[audio_rate * 2] { 0 };
+  float audio[audio_rate * 2] {};
+  read_audio_file(audio, audio_rate * 2);
   v.write_audio(audio, audio_rate);
 }
 
