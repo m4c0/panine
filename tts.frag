@@ -12,6 +12,7 @@ layout(location = 0) in vec2 pos;
 layout(location = 0) out vec4 colour;
 
 vec3 subtitle(vec2 p, vec3 c) {
+  p.y -= 0.08;
   p = clamp(p * 0.5 + 0.5, 0, 1);
 
   float d = texture(text, p).r * 10;
@@ -32,7 +33,7 @@ void main() {
   pp.y = abs(pp.y);
   vec3 c = texture(movie, pp * 0.5 + 0.5).brg * 0.1;
   
-  c *= pp.y;
+  c *= smoothstep(0.1, 0.25, pp.y);
 
   c = subtitle(p, c);
 
