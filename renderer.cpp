@@ -1,5 +1,6 @@
 #pragma leco app
 
+import breakimg;
 import jojo;
 import jute;
 import speak;
@@ -61,10 +62,15 @@ static void run_speech(jute::view bg, jute::view script) {
   }
 }
 
-void show_image() {
+static void show_image() {
+  breakimg b { dq, fb.render_pass() };
   // pipeline ppl { bg, &dq, fb.render_pass(), false };
   for (int frame = 0; frame < 60; frame++) {
     ots([&] {
+      breakimg::upc pc {
+        .scale { 1, 1 },
+      };
+      b.run(cb.cb(), rpb, pc);
     });
   }
 }
@@ -72,8 +78,11 @@ void show_image() {
 int main() {
   //run_speech(jojo::read_cstr("out/script.txt"));
   run_speech("out/IMG_2450.MOV", "Five reasons to test this.");
+  show_image();
   run_speech("out/IMG_2451.MOV", "First, I love it.");
+  show_image();
   run_speech("out/IMG_2450.MOV", "Second, I really love it.");
+  show_image();
   run_speech("out/IMG_2451.MOV", "Third, who would not love it?");
  
   float time = vframes / 30.0;
