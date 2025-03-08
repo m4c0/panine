@@ -1,6 +1,7 @@
 #pragma leco app
 
 import breakimg;
+import dotz;
 import jojo;
 import jute;
 import speak;
@@ -65,11 +66,11 @@ static void run_speech(jute::view bg, jute::view script) {
 static void show_image() {
   breakimg b { dq, fb.render_pass() };
   // pipeline ppl { bg, &dq, fb.render_pass(), false };
-  for (int frame = 0; frame < 60; frame++) {
+  for (int frame = 0; frame < 30; frame++) {
+    float t = static_cast<float>(frame) / 30.0f;
     ots([&] {
-      breakimg::upc pc {
-        .scale { 1, 1 },
-      };
+      breakimg::upc pc {};
+      pc.scale = dotz::mix(dotz::vec2 { 1 }, dotz::vec2 { 0 }, t);
       b.run(cb.cb(), rpb, pc);
     });
   }
