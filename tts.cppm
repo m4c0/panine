@@ -52,10 +52,10 @@ export class tts {
   }
 
 public:
-  tts(jute::view path, voo::device_and_queue * dq, vee::render_pass::type rp, bool rt)
+  tts(jute::view path, voo::device_and_queue * dq, vee::render_pass::type rp)
     : m_oqr { "tts", dq->physical_device(), rp, *m_pl }
     , m_scr { *dq, { 1024, 1024 } }
-    , m_mov { path, dq->physical_device(), dq->queue(), rt }
+    , m_mov { path, dq->physical_device(), dq->queue() }
   {
     m_mov.run_once();
     vee::update_descriptor_set(m_dset, 0, m_scr.image_view(), *m_smp);

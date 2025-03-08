@@ -60,7 +60,7 @@ static void ots(auto fn) {
 }
 
 static void run_speech(jute::view bg, jute::view script) {
-  tts ppl { bg, &dq, fb.render_pass(), false };
+  tts ppl { bg, &dq, fb.render_pass() };
  
   auto spk = spk::run(script);
   v.write_audio(spk.buffer.begin(), spk.buffer.size());

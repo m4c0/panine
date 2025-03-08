@@ -21,14 +21,10 @@ export class mov : public voo::updater<voo::h2l_image> {
   sitime::stopwatch m_time;
   vee::physical_device m_pd;
   hai::value<void *, mov_dealloc> m_ptr;
-  bool m_realtime {};
   unsigned m_frames {};
 
   void update_data(voo::h2l_image * img) override {
-    auto ms = mov_begin_frame(*m_ptr);
-    if (m_realtime && ms > m_time.millis()) {
-      sitime::sleep_ms(ms - m_time.millis());
-    }
+    mov_begin_frame(*m_ptr);
 
     int w, h;
     auto ptr = mov_frame(*m_ptr, &w, &h);
@@ -52,11 +48,10 @@ export class mov : public voo::updater<voo::h2l_image> {
   }
 
 public:
-  mov(jute::view path, vee::physical_device pd, voo::queue * q, bool rt)
+  mov(jute::view path, vee::physical_device pd, voo::queue * q)
     : updater { q, {} }
     , m_pd { pd }
     , m_ptr { mov_alloc(path.begin(), path.size()) }
-    , m_realtime { rt }
   {
     silog::log(silog::info, "Loaded movie [%.*s]", static_cast<unsigned>(path.size()), path.begin());
   }
