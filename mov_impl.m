@@ -38,6 +38,11 @@ void mov_dealloc(void * ptr) {
   id mov = (__bridge_transfer PNNMovie *)ptr;
   NSLog(@"Deallocating %@", mov);
 }
+void mov_skip(PNNMovie * m, int frames) {
+  for (int i = 0; i < frames; i++) {
+    [m.out copyNextSampleBuffer];
+  }
+}
 int mov_begin_frame(PNNMovie * m) {
   m.smp = [m.out copyNextSampleBuffer];
   m.img = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(m.smp);
