@@ -21,6 +21,8 @@ void * mov_alloc(void * pstr, unsigned plen) {
   NSURL * url = [NSURL fileURLWithPath:path];
   res.mov = [AVMovie movieWithURL:url options:nil];
 
+  NSLog(@"movie length: %f", CMTimeGetSeconds(res.mov.duration));
+
   NSDictionary * opts = @{
     (id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)
   };
@@ -38,11 +40,18 @@ void mov_dealloc(void * ptr) {
   id mov = (__bridge_transfer PNNMovie *)ptr;
   NSLog(@"Deallocating %@", mov);
 }
+
+int mov_frame_count(PNNMovie * m) {
+  AVAssetTrack * trk = [[m.mov tracksWithMediaType:AVMediaTypeVideo] firstObject];
+  return CMTimeGetSeconds(m.mov.duration) * trk.nominalFrameRate;
+}
+
 void mov_skip(PNNMovie * m, int frames) {
   for (int i = 0; i < frames; i++) {
     [m.out copyNextSampleBuffer];
   }
 }
+
 int mov_begin_frame(PNNMovie * m) {
   m.smp = [m.out copyNextSampleBuffer];
   m.img = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(m.smp);

@@ -11,6 +11,7 @@ extern "C" {
   void * mov_alloc(const char * path, unsigned plen);
   void mov_dealloc(void *);
   int mov_begin_frame(void * m);
+  int mov_frame_count(void * m);
   void mov_skip(void * m, int frames);
   unsigned * mov_frame(void * m, int * w, int * h);
   void mov_end_frame(void * m);
@@ -64,6 +65,7 @@ public:
     silog::log(silog::info, "Total frames played: %d (%3.2fs)", m_frames, time);
   }
 
+  int length() { return mov_frame_count(*m_ptr); }
   void skip(int f) { mov_skip(*m_ptr, f); }
 
   auto image_view() const { return data().iv(); }
