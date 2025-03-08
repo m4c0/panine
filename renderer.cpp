@@ -95,21 +95,26 @@ static void show_image(jute::view file, float volume, unsigned skip) {
 
   auto m4a = ("out/assets/" + file + ".m4a").cstr();
   float audio[audio_rate * 5] {};
-  read_audio_file(m4a.begin(), audio, audio_rate * 5);
-  for (auto & f : audio) f *= volume;
+  if (volume > 0) {
+    read_audio_file(m4a.begin(), audio, audio_rate * 5);
+    for (auto & f : audio) f *= volume;
+  }
   v.write_audio(audio + skip, audio_rate);
+}
+
+void run(jute::view msg, jute::view post, float vol, unsigned skip) {
+  run_speech(*random_movie(), msg);
+  show_image(post, vol, skip);
 }
 
 int main() {
   rng::seed();
 
-  run_speech(*random_movie(), "Five reasons to test this.");
-  show_image("nerdy", 3.5, 10000);
-  run_speech(*random_movie(), "First, I love it.");
-  show_image("shrug", 5.5, 10000);
-  run_speech(*random_movie(), "Second, I really love it.");
-  show_image("jacked", 7.5, 10000);
-  run_speech(*random_movie(), "Third, who would not love it?");
+  run("These are five reasons to test this", "hmm", 1.0, 10000);
+  run("First, this is what we would expect", "nerdy", 5.0, 20000);
+  run("Second, why not?", "shrug", 6.0, 10000);
+  run("Third, of course", "jacked", 2.0, 10000);
+  run_speech(*random_movie(), "Like, etc");
  
   float time = vframes / 30.0;
   silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
