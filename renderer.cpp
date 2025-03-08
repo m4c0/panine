@@ -81,9 +81,9 @@ static void run_speech(jute::view bg, jute::view script) {
 }
 
 extern "C" void read_audio_file(const char * fn, float * out, int count);
-static void show_image(float volume, unsigned skip) {
-  // TODO: file name as parameter
-  breakimg b { "out/assets/jacked.jpg", dq, fb.render_pass() };
+static void show_image(jute::view file, float volume, unsigned skip) {
+  auto img = ("out/assets/" + file + ".jpg").cstr();
+  breakimg b { img.begin(), dq, fb.render_pass() };
   for (int frame = 0; frame < 30; frame++) {
     float t = static_cast<float>(frame) / 30.0f;
     ots([&] {
@@ -93,8 +93,9 @@ static void show_image(float volume, unsigned skip) {
     });
   }
 
+  auto m4a = ("out/assets/" + file + ".m4a").cstr();
   float audio[audio_rate * 5] {};
-  read_audio_file("out/assets/jacked.m4a", audio, audio_rate * 5);
+  read_audio_file(m4a.begin(), audio, audio_rate * 5);
   for (auto & f : audio) f *= volume;
   v.write_audio(audio + skip, audio_rate);
 }
@@ -102,13 +103,12 @@ static void show_image(float volume, unsigned skip) {
 int main() {
   rng::seed();
 
-  //run_speech(jojo::read_cstr("out/script.txt"));
   run_speech(*random_movie(), "Five reasons to test this.");
-  show_image(3.5, 10000);
+  show_image("nerdy", 3.5, 10000);
   run_speech(*random_movie(), "First, I love it.");
-  show_image(5.5, 10000);
+  show_image("shrug", 5.5, 10000);
   run_speech(*random_movie(), "Second, I really love it.");
-  show_image(7.5, 10000);
+  show_image("jacked", 7.5, 10000);
   run_speech(*random_movie(), "Third, who would not love it?");
  
   float time = vframes / 30.0;
