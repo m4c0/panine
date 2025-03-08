@@ -3,6 +3,7 @@
 export module tts;
 import jute;
 import mov;
+import rng;
 import sith;
 import scriber;
 import scripter;
@@ -57,6 +58,7 @@ public:
     , m_scr { *dq, { 1024, 1024 } }
     , m_mov { path, dq->physical_device(), dq->queue() }
   {
+    m_mov.skip(rng::rand(m_mov.length() - 300));
     m_mov.run_once();
     vee::update_descriptor_set(m_dset, 0, m_scr.image_view(), *m_smp);
     vee::update_descriptor_set(m_dset, 1, m_mov.image_view(), *m_smp);
