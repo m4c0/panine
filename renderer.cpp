@@ -102,20 +102,32 @@ static void show_image(jute::view file, float volume, unsigned skip) {
   v.write_audio(audio + skip, audio_rate);
 }
 
-void run(jute::view msg, jute::view post, float vol, unsigned skip) {
-  run_speech(*random_movie(), msg);
-  show_image(post, vol, skip);
+static constexpr int atoi(jute::view v) {
+  int res = 0;
+  for (auto c : v) {
+    if (c < '0' || c > '9') return -1;
+    res = res * 10 + (c - '0');
+  }
+  return res;
 }
 
 int main() {
   rng::seed();
 
-  run("These are five reasons to test this", "hmm", 1.0, 10000);
-  run("First, this is what we would expect", "nerdy", 5.0, 20000);
-  run("Second, why not?", "shrug", 6.0, 10000);
-  run("Third, of course", "jacked", 2.0, 10000);
-  run_speech(*random_movie(), "Like, etc");
- 
+  auto script = jojo::read_cstr("out/script.txt");
+  jute::view rest { script };
+  while (rest.size()) {
+    auto [l, r] = rest.split('\n');
+    if (l[0] != '+') {
+      run_speech(*random_movie(), l);
+    } else {
+      auto [img, r0] = l.subview(1).after.split(',');
+      auto [vol, skip] = r0.split(',');
+      show_image(img, atoi(vol), atoi(skip));
+    }
+    rest = r;
+  }
+
   float time = vframes / 30.0;
   silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
 
