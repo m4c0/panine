@@ -31,6 +31,15 @@ static AVSpeechUtterance * create_utt(void * txt, int n) {
 }
 void speak_voice(const char * n) {
   voiceId = [NSString stringWithUTF8String:n];
+
+  NSArray * voices = [AVSpeechSynthesisVoice speechVoices];
+  for (AVSpeechSynthesisVoice * v in voices) {
+    if ([v.identifier isEqualToString:voiceId]) return;
+  }
+
+  for (AVSpeechSynthesisVoice * v in voices) {
+    NSLog(@"%@", v.identifier);
+  }
 }
 void speak(void * user, void * txt, unsigned n) {
   PNNSpeechDelegate * del = [PNNSpeechDelegate new];
