@@ -5,6 +5,7 @@ import jute;
 import silog;
 
 extern "C" void speak(void * self, const char * txt, unsigned n);
+extern "C" void speak_voice(const char * n);
 
 namespace spk {
   export struct word {
@@ -16,6 +17,10 @@ namespace spk {
     hai::varray<float> buffer { 4 * 1024 * 1024 };
     hai::varray<word> words { 16 * 1024 };
   };
+
+  export void set_voice(const char * n) {
+    speak_voice(n);
+  }
 
   export [[nodiscard]] auto run(jute::view script) {
     buffers b {};
