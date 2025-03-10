@@ -117,8 +117,9 @@ int main() {
   auto script = jojo::read_cstr("out/script.txt");
   jute::view rest { script };
   while (rest.size()) {
-    auto [l, r] = rest.split('\n');
-    if (l[0] != '+') {
+    auto [l, r] = rest.split('\n'); 
+    if (l[0] == '#') { // Comment, ignore
+    } else if (l[0] != '+') {
       run_speech(*random_movie(), l);
     } else {
       auto [img, r0] = l.subview(1).after.split(',');
