@@ -22,7 +22,7 @@ static AVSpeechUtterance * create_utt(void * txt, int n) {
 
   NSString * text = [[NSString alloc] initWithBytesNoCopy:txt
                                                    length:n
-                                                 encoding:NSASCIIStringEncoding
+                                                 encoding:NSUTF8StringEncoding
                                              freeWhenDone:false];
   AVSpeechUtterance * utt = [AVSpeechUtterance speechUtteranceWithString:text];
   utt.voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voiceId];
