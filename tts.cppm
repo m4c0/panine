@@ -6,7 +6,6 @@ import mov;
 import rng;
 import sith;
 import scriber;
-import scripter;
 import vee;
 import voo;
 
