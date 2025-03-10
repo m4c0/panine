@@ -111,9 +111,7 @@ static constexpr int atoi(jute::view v) {
   return res;
 }
 
-int main() {
-  rng::seed();
-
+void run_script() {
   auto script = jojo::read_cstr("out/script.txt");
   jute::view rest { script };
   while (rest.size()) {
@@ -128,6 +126,12 @@ int main() {
     }
     rest = r;
   }
+}
+
+int main() {
+  rng::seed();
+
+  run_script();
 
   float time = vframes / 30.0;
   silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
