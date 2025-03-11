@@ -5,6 +5,7 @@ import jute;
 import silog;
 
 extern "C" void speak(void * self, const char * txt, unsigned n);
+extern "C" void speak_rate(float r);
 extern "C" void speak_voice(const char * n);
 
 namespace spk {
@@ -20,6 +21,9 @@ namespace spk {
 
   export void set_voice(const char * n) {
     speak_voice(n);
+  }
+  export void set_rate(float r) {
+    speak_rate(r);
   }
 
   export [[nodiscard]] auto run(jute::view script) {

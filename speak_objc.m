@@ -15,6 +15,7 @@ void speak_marker_callback(void *, const char * str, unsigned offset);
 @end
 
 static NSString * voiceId = @"com.apple.voice.compact.en-GB.Daniel";
+static float uttRate = 0.6;
 
 static AVSpeechUtterance * create_utt(void * txt, int n) {
   float max = AVSpeechUtteranceMaximumSpeechRate;
@@ -26,9 +27,10 @@ static AVSpeechUtterance * create_utt(void * txt, int n) {
                                              freeWhenDone:false];
   AVSpeechUtterance * utt = [AVSpeechUtterance speechUtteranceWithString:text];
   utt.voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voiceId];
-  utt.rate = (max - min) * 0.6 + min;
+  utt.rate = (max - min) * uttRate + min;
   return utt;
 }
+void speak_rate(float r) { uttRate = r; }
 void speak_voice(const char * n) {
   voiceId = [NSString stringWithUTF8String:n];
 
