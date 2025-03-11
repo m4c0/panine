@@ -117,7 +117,8 @@ void run_script() {
   jute::view rest { script };
   while (rest.size()) {
     auto [l, r] = rest.split('\n'); 
-    if (l[0] == '#') { // Comment, ignore
+    if (l.size() == 0) { // Empty line, ignore
+    } else if (l[0] == '#') { // Comment, ignore
     } else if (l[0] != '+') {
       run_speech(*random_movie(), l);
     } else {
