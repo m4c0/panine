@@ -79,7 +79,7 @@ static void run_speech(jute::view bg, jute::view script) {
     }
   }
 }
-static void run_speech(jute::view l) { run_speech(*random_movie(), l); }
+void run_speech(jute::view l) { run_speech(*random_movie(), l); }
 
 extern "C" void read_audio_file(const char * fn, float * out, int count);
 static void show_image(jute::view file, float volume, unsigned skip) {
