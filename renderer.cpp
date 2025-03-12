@@ -112,6 +112,11 @@ static constexpr int atoi(jute::view v) {
   return res;
 }
 
+static void run_command(jute::view v) {
+  auto [cmd, arg] = v.split(' ');
+  silog::trace(cmd, arg);
+}
+
 void run_script() {
   auto script = jojo::read_cstr("out/script.txt");
   jute::view rest { script };
@@ -119,6 +124,8 @@ void run_script() {
     auto [l, r] = rest.split('\n'); 
     if (l.size() == 0) { // Empty line, ignore
     } else if (l[0] == '#') { // Comment, ignore
+    } else if (l[0] == ':') {
+      run_command(l.subview(1).after);
     } else if (l[0] != '+') {
       run_speech(*random_movie(), l);
     } else {
