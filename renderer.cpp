@@ -114,6 +114,8 @@ static constexpr int atoi(jute::view v) {
 
 static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
+  // TODO: voice command
+  // TODO: rate command
   silog::trace(cmd, arg);
 }
 
