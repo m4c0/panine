@@ -106,7 +106,7 @@ static void show_image(jute::view file, float volume, unsigned skip) {
 static constexpr int atoi(jute::view v) {
   int res = 0;
   for (auto c : v) {
-    if (c < '0' || c > '9') return -1;
+    if (c < '0' || c > '9') throw 0;
     res = res * 10 + (c - '0');
   }
   return res;
