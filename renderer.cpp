@@ -111,15 +111,26 @@ static constexpr int atoi(jute::view v) {
   }
   return res;
 }
+static constexpr float atof(jute::view v) {
+  float res = 0;
+  int decimals = -1;
+  for (auto c : v) {
+    if (c == '.' && decimals == -1) {
+      decimals = 0;
+      continue;
+    } else if (c == '.') throw 0;
+    if (c < '0' || c > '9') throw 0;
 
-static void run_cmd_rate(jute::view arg) {
-  // TODO: rate command
-  silog::trace("rate", arg);
+    res = res * 10 + (c - '0');
+    
+    if (decimals >= 0) decimals++;
+  }
+  for (auto i = 0; i < decimals; i++) res /= 10;
+  return res;
 }
-static void run_cmd_voice(jute::view arg) {
-  // TODO: voice command
-  silog::trace("voice", arg);
-}
+
+static void run_cmd_rate(jute::view arg) { spk::set_rate(atof(arg)); }
+static void run_cmd_voice(jute::view arg) { spk::set_voice(arg.cstr().begin()); }
 
 static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
