@@ -131,12 +131,9 @@ static constexpr float atof(jute::view v) {
 
 static void run_script(jute::view v);
 
+static void run_cmd_load(jute::view arg) { run_script(arg); }
 static void run_cmd_rate(jute::view arg) { spk::set_rate(atof(arg)); }
 static void run_cmd_voice(jute::view arg) { spk::set_voice(arg.cstr().begin()); }
-
-static void run_cmd_load(jute::view arg) {
-  run_script(arg);
-}
 
 static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
@@ -147,7 +144,16 @@ static void run_command(jute::view v) {
 }
 
 static void run_script(jute::view name) {
-  auto script = jojo::read_cstr(name);
+  static hai::varray<jute::heap> stack { 1024 };
+  if (stack.size() > 0) {
+    auto n = stack[stack.size() - 1];
+    auto [path, fn] = (*n).rsplit('/');
+    stack.push_back(jute::heap { path } + "/" + name);
+  } else {
+    stack.push_back(name);
+  }
+
+  auto script = jojo::read_cstr(*stack[stack.size() - 1]);
   jute::view rest { script };
   while (rest.size()) {
     auto [l, r] = rest.split('\n'); 
@@ -164,6 +170,8 @@ static void run_script(jute::view name) {
     }
     rest = r;
   }
+
+  stack.pop_back();
 }
 
 int main() {
