@@ -129,17 +129,24 @@ static constexpr float atof(jute::view v) {
   return res;
 }
 
+static void run_script(jute::view v);
+
 static void run_cmd_rate(jute::view arg) { spk::set_rate(atof(arg)); }
 static void run_cmd_voice(jute::view arg) { spk::set_voice(arg.cstr().begin()); }
+
+static void run_cmd_load(jute::view arg) {
+  run_script(arg);
+}
 
 static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
        if (cmd == "rate")  run_cmd_rate(arg);
   else if (cmd == "voice") run_cmd_voice(arg); 
+  else if (cmd == "load")  run_cmd_load(arg);
   else silog::die("invalid command");
 }
 
-void run_script(jute::view name) {
+static void run_script(jute::view name) {
   auto script = jojo::read_cstr(name);
   jute::view rest { script };
   while (rest.size()) {
