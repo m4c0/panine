@@ -112,11 +112,19 @@ static constexpr int atoi(jute::view v) {
   return res;
 }
 
+static void run_cmd_rate(jute::view arg) {
+  // TODO: rate command
+  silog::trace("rate", arg);
+}
+static void run_cmd_voice(jute::view arg) {
+  // TODO: voice command
+  silog::trace("voice", arg);
+}
+
 static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
-  // TODO: voice command
-  // TODO: rate command
-  silog::trace(cmd, arg);
+       if (cmd == "rate")  run_cmd_rate(arg);
+  else if (cmd == "voice") run_cmd_voice(arg); 
 }
 
 void run_script() {
