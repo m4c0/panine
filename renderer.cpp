@@ -106,7 +106,7 @@ static void show_image(jute::view file, float volume, unsigned skip) {
 static constexpr int atoi(jute::view v) {
   int res = 0;
   for (auto c : v) {
-    if (c < '0' || c > '9') throw 0;
+    if (c < '0' || c > '9') silog::die("invalid integer");
     res = res * 10 + (c - '0');
   }
   return res;
@@ -118,8 +118,8 @@ static constexpr float atof(jute::view v) {
     if (c == '.' && decimals == -1) {
       decimals = 0;
       continue;
-    } else if (c == '.') throw 0;
-    if (c < '0' || c > '9') throw 0;
+    } else if (c == '.') silog::die("invalid float");
+    if (c < '0' || c > '9') silog::die("invalid float");
 
     res = res * 10 + (c - '0');
     
@@ -136,6 +136,7 @@ static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
        if (cmd == "rate")  run_cmd_rate(arg);
   else if (cmd == "voice") run_cmd_voice(arg); 
+  else silog::die("invalid command");
 }
 
 void run_script() {
