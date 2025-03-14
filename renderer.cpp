@@ -139,8 +139,8 @@ static void run_command(jute::view v) {
   else silog::die("invalid command");
 }
 
-void run_script() {
-  auto script = jojo::read_cstr("out/script.txt");
+void run_script(jute::view name) {
+  auto script = jojo::read_cstr(name);
   jute::view rest { script };
   while (rest.size()) {
     auto [l, r] = rest.split('\n'); 
@@ -162,7 +162,7 @@ void run_script() {
 int main() {
   rng::seed();
 
-  run_script();
+  run_script("out/script.txt");
 
   float time = vframes / 30.0;
   silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
