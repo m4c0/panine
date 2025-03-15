@@ -1,7 +1,6 @@
 #pragma leco app
-#pragma leco add_impl "renderer_objc"
 
-import breakimg;
+import cmd;
 import dotz;
 import hai;
 import jojo;
@@ -51,28 +50,6 @@ static void run_speech(jute::view bg, jute::view script) {
   }
 }
 void run_speech(jute::view l) { run_speech(*random_movie(), l); }
-
-extern "C" void read_audio_file(const char * fn, float * out, int count);
-static void show_image(jute::view file, float volume, unsigned skip) {
-  auto img = ("out/assets/" + file + ".jpg").cstr();
-  breakimg b { img.begin(), *ots.dq(), ots.render_pass() };
-  for (int frame = 0; frame < 30; frame++) {
-    float t = static_cast<float>(frame) / 30.0f;
-    ots([&](auto cb) {
-      breakimg::upc pc {};
-      pc.scale = dotz::mix(dotz::vec2 { 1 }, dotz::vec2 { 0 }, t);
-      b.run(cb, ots.render_pass_begin(), pc);
-    });
-  }
-
-  auto m4a = ("out/assets/" + file + ".m4a").cstr();
-  float audio[audio_rate * 5] {};
-  if (volume > 0) {
-    read_audio_file(m4a.begin(), audio, audio_rate * 5);
-    for (auto & f : audio) f *= volume;
-  }
-  ots.write_audio(audio + skip, audio_rate);
-}
 
 static constexpr int atoi(jute::view v) {
   int res = 0;
@@ -137,7 +114,7 @@ static void run_script(jute::view name) {
     } else {
       auto [img, r0] = l.subview(1).after.split(',');
       auto [vol, skip] = r0.split(',');
-      show_image(img, atoi(vol), atoi(skip));
+      cmd::image(ots, img, atoi(vol), atoi(skip));
     }
     rest = r;
   }
