@@ -16,9 +16,7 @@ import vee;
 import vo;
 import voo;
 
-static voo::device_and_queue dq { "panine-render" };
-static ots ots { &dq };
-static vo v {};
+static ots ots {};
 
 static constexpr const auto audio_rate = 22050; // defined by Apple's TTS
 
@@ -35,17 +33,17 @@ static auto random_movie() {
 }
 
 static void run_speech(jute::view bg, jute::view script) {
-  tts ppl { bg, &dq, ots.render_pass() };
+  tts ppl { bg, ots.dq(), ots.render_pass() };
  
   auto spk = spk::run(script);
-  v.write_audio(spk.buffer.begin(), spk.buffer.size());
+  ots.write_audio(spk.buffer.begin(), spk.buffer.size());
  
   int frame = 0;
   for (auto & w : spk.words) {
     silog::trace("generate", w.text);
     auto count = w.offset * 30 / audio_rate;
     for (; frame < count; frame++) {
-      ots(v, [&](auto cb) {
+      ots([&](auto cb) {
         ppl.run(cb, ots.render_pass_begin(), *w.text);
       });
       
@@ -59,10 +57,10 @@ void run_speech(jute::view l) { run_speech(*random_movie(), l); }
 extern "C" void read_audio_file(const char * fn, float * out, int count);
 static void show_image(jute::view file, float volume, unsigned skip) {
   auto img = ("out/assets/" + file + ".jpg").cstr();
-  breakimg b { img.begin(), dq, ots.render_pass() };
+  breakimg b { img.begin(), *ots.dq(), ots.render_pass() };
   for (int frame = 0; frame < 30; frame++) {
     float t = static_cast<float>(frame) / 30.0f;
-    ots(v, [&](auto cb) {
+    ots([&](auto cb) {
       breakimg::upc pc {};
       pc.scale = dotz::mix(dotz::vec2 { 1 }, dotz::vec2 { 0 }, t);
       b.run(cb, ots.render_pass_begin(), pc);
@@ -75,7 +73,7 @@ static void show_image(jute::view file, float volume, unsigned skip) {
     read_audio_file(m4a.begin(), audio, audio_rate * 5);
     for (auto & f : audio) f *= volume;
   }
-  v.write_audio(audio + skip, audio_rate);
+  ots.write_audio(audio + skip, audio_rate);
 }
 
 static constexpr int atoi(jute::view v) {
@@ -153,7 +151,4 @@ int main() {
   rng::seed();
 
   run_script("out/script.txt");
-
-  v.done();
-  while (!v.wait());
 }
