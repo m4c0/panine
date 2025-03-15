@@ -12,8 +12,6 @@ import rng;
 import speak;
 import silog;
 import tts;
-import vee;
-import vo;
 import voo;
 
 static ots ots {};
