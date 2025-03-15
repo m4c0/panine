@@ -6,6 +6,7 @@ import dotz;
 import hai;
 import jojo;
 import jute;
+import ots;
 import pprent;
 import rng;
 import speak;
@@ -16,14 +17,10 @@ import vo;
 import voo;
 
 static voo::device_and_queue dq { "panine-render" };
+static ots ots { &dq };
 static vo v {};
-static int vframes {};
 
 static constexpr const auto audio_rate = 22050; // defined by Apple's TTS
-static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
-static voo::offscreen::buffers fb { dq.physical_device(), vo::extent, format };
-static voo::single_cb cb { dq.queue_family() };
-static vee::render_pass_begin rpb = fb.render_pass_begin({});
 
 static auto random_movie() {
   hai::chain<jute::heap> files { 1024 };
@@ -37,30 +34,8 @@ static auto random_movie() {
   return files.seek(rng::rand(files.size()));
 }
 
-static void ots(auto fn) {
-  {
-    voo::cmd_buf_one_time_submit ots { cb.cb() };
-    fn();
-    fb.cmd_copy_to_host(cb.cb());
-  }
-  dq.queue()->queue_submit({
-    .command_buffer = cb.cb(),
-  });
-  vee::device_wait_idle();
-
-  auto mm = fb.map_host();
-  auto in = static_cast<vo::pix *>(*mm);
-  auto out = v.lock();
-  for (auto i = 0; i < vo::extent.width * vo::extent.height; i++) {
-    *out = {{ in->p[3], in->p[0], in->p[1], in->p[2] }};
-    out++;
-    in++;
-  }
-  v.unlock(vframes++);
-}
-
 static void run_speech(jute::view bg, jute::view script) {
-  tts ppl { bg, &dq, fb.render_pass() };
+  tts ppl { bg, &dq, ots.render_pass() };
  
   auto spk = spk::run(script);
   v.write_audio(spk.buffer.begin(), spk.buffer.size());
@@ -70,8 +45,8 @@ static void run_speech(jute::view bg, jute::view script) {
     silog::trace("generate", w.text);
     auto count = w.offset * 30 / audio_rate;
     for (; frame < count; frame++) {
-      ots([&] {
-        ppl.run(cb.cb(), rpb, *w.text);
+      ots(v, [&](auto cb) {
+        ppl.run(cb, ots.render_pass_begin(), *w.text);
       });
       
       ppl.next_frame();
@@ -84,13 +59,13 @@ void run_speech(jute::view l) { run_speech(*random_movie(), l); }
 extern "C" void read_audio_file(const char * fn, float * out, int count);
 static void show_image(jute::view file, float volume, unsigned skip) {
   auto img = ("out/assets/" + file + ".jpg").cstr();
-  breakimg b { img.begin(), dq, fb.render_pass() };
+  breakimg b { img.begin(), dq, ots.render_pass() };
   for (int frame = 0; frame < 30; frame++) {
     float t = static_cast<float>(frame) / 30.0f;
-    ots([&] {
+    ots(v, [&](auto cb) {
       breakimg::upc pc {};
       pc.scale = dotz::mix(dotz::vec2 { 1 }, dotz::vec2 { 0 }, t);
-      b.run(cb.cb(), rpb, pc);
+      b.run(cb, ots.render_pass_begin(), pc);
     });
   }
 
@@ -178,9 +153,6 @@ int main() {
   rng::seed();
 
   run_script("out/script.txt");
-
-  float time = vframes / 30.0;
-  silog::log(silog::info, "Total frames in output: %d (%3.2fs)", vframes, time);
 
   v.done();
   while (!v.wait());
