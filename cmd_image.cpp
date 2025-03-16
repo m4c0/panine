@@ -28,3 +28,8 @@ void cmd::image(ots & ots, jute::view file, float volume, unsigned skip) {
   ots.write_audio(audio + skip, audio_rate);
 }
 
+void cmd::image(ots & ots, jute::view line) {
+  auto [img, r0] = line.subview(1).after.split(',');
+  auto [vol, skip] = r0.split(',');
+  cmd::image(ots, img, atoi(vol), atoi(skip));
+}

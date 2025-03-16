@@ -51,14 +51,6 @@ static void run_speech(jute::view bg, jute::view script) {
 }
 void run_speech(jute::view l) { run_speech(*random_movie(), l); }
 
-static constexpr int atoi(jute::view v) {
-  int res = 0;
-  for (auto c : v) {
-    if (c < '0' || c > '9') silog::die("invalid integer");
-    res = res * 10 + (c - '0');
-  }
-  return res;
-}
 static constexpr float atof(jute::view v) {
   float res = 0;
   int decimals = -1;
@@ -112,9 +104,7 @@ static void run_script(jute::view name) {
     } else if (l[0] != '+') {
       run_speech(*random_movie(), l);
     } else {
-      auto [img, r0] = l.subview(1).after.split(',');
-      auto [vol, skip] = r0.split(',');
-      cmd::image(ots, img, atoi(vol), atoi(skip));
+      cmd::image(ots, l);
     }
     rest = r;
   }
