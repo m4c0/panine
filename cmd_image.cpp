@@ -7,7 +7,12 @@ module cmd;
 import breakimg;
 import dotz;
 
-void cmd::image(ots & ots, jute::view file, float volume, unsigned skip) {
+void cmd::zoom_out(ots & ots, jute::view line) {
+  auto [file, r0] = line.subview(1).after.split(',');
+  auto [vol, sk] = r0.split(',');
+  auto volume = atof(vol);
+  auto skip = atoi(sk);
+
   auto img = ("out/assets/" + file + ".jpg").cstr();
   breakimg b { img.begin(), *ots.dq(), ots.render_pass() };
   for (int frame = 0; frame < 30; frame++) {
@@ -26,10 +31,4 @@ void cmd::image(ots & ots, jute::view file, float volume, unsigned skip) {
     for (auto & f : audio) f *= volume;
   }
   ots.write_audio(audio + skip, audio_rate);
-}
-
-void cmd::image(ots & ots, jute::view line) {
-  auto [img, r0] = line.subview(1).after.split(',');
-  auto [vol, skip] = r0.split(',');
-  cmd::image(ots, img, atoi(vol), atoi(skip));
 }
