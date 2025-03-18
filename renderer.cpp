@@ -71,15 +71,11 @@ static constexpr float atof(jute::view v) {
 
 static void run_script(jute::view v);
 
-static void run_cmd_load(jute::view arg) { run_script(arg); }
-static void run_cmd_rate(jute::view arg) { spk::set_rate(atof(arg)); }
-static void run_cmd_voice(jute::view arg) { spk::set_voice(arg.cstr().begin()); }
-
 static void run_command(jute::view v) {
   auto [cmd, arg] = v.split(' ');
-       if (cmd == "rate")    run_cmd_rate(arg);
-  else if (cmd == "voice")   run_cmd_voice(arg); 
-  else if (cmd == "load")    run_cmd_load(arg);
+       if (cmd == "rate")    spk::set_rate(atof(arg));
+  else if (cmd == "voice")   spk::set_voice(arg.cstr().begin()); 
+  else if (cmd == "load")    run_script(arg);
   else if (cmd == "zoomout") cmd::zoom_out(ots, arg);
   else silog::die("invalid command");
 }
