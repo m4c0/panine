@@ -115,8 +115,19 @@ static void run_script(jute::view name) {
   stack.pop_back();
 }
 
-int main() {
+constexpr const char * shift(int & c, char ** & v) { return (c <= 0) ? nullptr : (--c, *v++); }
+
+int main(int argc, char ** argv) {
   rng::seed();
 
-  run_script("out/script.txt");
+  if (argc == 1) {
+    run_script("out/script.txt");
+    return 0;
+  }
+
+  shift(argc, argv);
+  while (auto c = shift(argc, argv)) {
+    run_script(jute::view::unsafe(c));
+  }
+  return 0;
 }
