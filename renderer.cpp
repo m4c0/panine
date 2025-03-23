@@ -97,6 +97,10 @@ static void run_script(jute::view name) {
   });
 
   auto script = jojo::read_cstr(*stack[stack.size() - 1]);
+  silog::log(silog::info, "parsing [%.*s] with %d bytes",
+        static_cast<unsigned>(name.size()), name.begin(),
+        script.size());
+
   jute::view rest { script };
   while (rest.size()) {
     auto [l, r] = rest.split('\n'); 
