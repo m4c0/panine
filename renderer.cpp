@@ -1,4 +1,4 @@
-#pragma leco app
+#pragma leco tool
 
 import cmd;
 import dotz;
