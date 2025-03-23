@@ -90,6 +90,12 @@ static void run_script(jute::view name) {
     stack.push_back(name);
   }
 
+  jojo::on_error([name](auto, auto err) {
+    silog::die("Error reading [%.*s]: %.*s",
+        static_cast<unsigned>(name.size()), name.begin(),
+        static_cast<unsigned>(err.size()), err.begin());
+  });
+
   auto script = jojo::read_cstr(*stack[stack.size() - 1]);
   jute::view rest { script };
   while (rest.size()) {
