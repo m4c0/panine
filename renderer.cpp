@@ -13,7 +13,7 @@ import silog;
 import tts;
 import voo;
 
-static ots ots {};
+static ots ots { false };
 
 static constexpr const auto audio_rate = 22050; // defined by Apple's TTS
 

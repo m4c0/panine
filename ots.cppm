@@ -6,7 +6,7 @@ import voo;
 static constexpr const auto format = VK_FORMAT_R8G8B8A8_SRGB;
 
 export class ots {
-  voo::device_and_queue m_dq { "panine-render" };
+  voo::device_and_queue m_dq ;
   voo::single_cb m_cb { m_dq.queue_family() };
   voo::offscreen::buffers m_fb { m_dq.physical_device(), vo::extent, format };
 
@@ -14,6 +14,7 @@ export class ots {
   int m_vframes {};
 
 public:
+  explicit ots(bool debug) : m_dq { "panine-render", debug } {}
   ~ots() {
     float time = m_vframes / 30.0;
     silog::log(silog::info, "Total frames in output: %d (%3.2fs)", m_vframes, time);
