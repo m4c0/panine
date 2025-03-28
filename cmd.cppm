@@ -33,5 +33,6 @@ namespace cmd {
     return res;
   }
 
+  export void image(jute::view line);
   export void zoom_out(ots & ots, jute::view line);
 }

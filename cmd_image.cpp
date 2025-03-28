@@ -6,6 +6,21 @@ extern "C" void read_audio_file(const char * fn, float * out, int count);
 module cmd;
 import breakimg;
 import dotz;
+import hai;
+
+namespace {
+  struct img {
+    jute::heap name;
+    jute::heap line;
+  };
+  hai::chain<img> g_imgs { 1024 };
+}
+
+void cmd::image(jute::view line) {
+  auto [name, rest] = line.subview(1).after.split(' ');
+  silog::log(silog::info, "setup image [%s] with [%s]", name.cstr().begin(), rest.cstr().begin());
+  g_imgs.push_back({ name, rest });
+}
 
 void cmd::zoom_out(ots & ots, jute::view line) {
   auto [file, r0] = line.subview(1).after.split(',');

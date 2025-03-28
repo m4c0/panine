@@ -76,6 +76,7 @@ static void run_command(jute::view v) {
        if (cmd == "rate")    spk::set_rate(atof(arg));
   else if (cmd == "voice")   spk::set_voice(arg.cstr().begin()); 
   else if (cmd == "load")    run_script(arg);
+  else if (cmd == "image")   cmd::image(arg);
   else if (cmd == "zoomout") cmd::zoom_out(ots, arg);
   else silog::die("invalid command");
 }
