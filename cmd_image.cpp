@@ -19,7 +19,7 @@ namespace {
 using namespace cmd;
 
 void cmd::image(jute::view line) {
-  auto [name, rest] = line.subview(1).after.split(' ');
+  auto [name, rest] = line.split(' ');
   silog::log(silog::info, "setup image [%s] with [%s]", name.cstr().begin(), rest.cstr().begin());
   g_imgs.push_back({ name, rest });
 }
