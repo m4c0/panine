@@ -25,7 +25,7 @@ void cmd::image(jute::view line) {
 }
 
 static void zoom_out(ots & ots, jute::view line) {
-  auto [file, r0] = line.subview(1).after.split(',');
+  auto [file, r0] = line.split(',');
   auto [vol, sk] = r0.split(',');
   auto volume = atof(vol);
   auto skip = atoi(sk);
@@ -51,6 +51,8 @@ static void zoom_out(ots & ots, jute::view line) {
 }
 
 void cmd::zoom_out(ots & ots, jute::view line) {
+  line = line.subview(1).after;
+
   for (auto &[name, line]: g_imgs) 
     if (name == line) return ::zoom_out(ots, *line);
 
