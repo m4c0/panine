@@ -16,13 +16,15 @@ namespace {
   hai::chain<img> g_imgs { 1024 };
 }
 
+using namespace cmd;
+
 void cmd::image(jute::view line) {
   auto [name, rest] = line.subview(1).after.split(' ');
   silog::log(silog::info, "setup image [%s] with [%s]", name.cstr().begin(), rest.cstr().begin());
   g_imgs.push_back({ name, rest });
 }
 
-void cmd::zoom_out(ots & ots, jute::view line) {
+static void zoom_out(ots & ots, jute::view line) {
   auto [file, r0] = line.subview(1).after.split(',');
   auto [vol, sk] = r0.split(',');
   auto volume = atof(vol);
@@ -46,4 +48,11 @@ void cmd::zoom_out(ots & ots, jute::view line) {
     for (auto & f : audio) f *= volume;
   }
   ots.write_audio(audio + skip, audio_rate);
+}
+
+void cmd::zoom_out(ots & ots, jute::view line) {
+  for (auto &[name, line]: g_imgs) 
+    if (name == line) return ::zoom_out(ots, *line);
+
+  ::zoom_out(ots, line);
 }
