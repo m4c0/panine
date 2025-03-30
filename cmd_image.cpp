@@ -30,7 +30,13 @@ static void zoom_out(ots & ots, jute::view line) {
   auto volume = atof(vol);
   auto skip = atoi(sk);
 
-  auto img = ("out/assets/" + file + ".jpg").cstr();
+  auto [vfile, afile] = file.split('+');
+  if (afile == "") afile = vfile;
+
+  auto img = ("out/assets/" + vfile + ".jpg").cstr();
+  auto m4a = ("out/assets/" + afile + ".m4a").cstr();
+  silog::log(silog::info, "rendering intermission with image [%s] and audio [%s]", img.begin(), m4a.begin());
+
   breakimg b { img.begin(), *ots.dq(), ots.render_pass() };
   for (int frame = 0; frame < 30; frame++) {
     float t = static_cast<float>(frame) / 30.0f;
@@ -41,7 +47,6 @@ static void zoom_out(ots & ots, jute::view line) {
     });
   }
 
-  auto m4a = ("out/assets/" + file + ".m4a").cstr();
   float audio[audio_rate * 5] {};
   if (volume > 0) {
     read_audio_file(m4a.begin(), audio, audio_rate * 5);
