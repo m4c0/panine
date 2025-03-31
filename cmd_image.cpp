@@ -7,6 +7,7 @@ module cmd;
 import breakimg;
 import dotz;
 import hai;
+import mtime;
 
 namespace {
   struct img {
@@ -34,6 +35,7 @@ static void zoom_out(ots & ots, jute::view line) {
   if (afile == "") afile = vfile;
 
   auto img = ("out/assets/" + vfile + ".jpg").cstr();
+  if (!mtime::of(img.begin())) img = ("out/assets/" + vfile + ".png").cstr();
   auto m4a = ("out/assets/" + afile + ".m4a").cstr();
   silog::log(silog::info, "rendering intermission with image [%s] and audio [%s]", img.begin(), m4a.begin());
 
