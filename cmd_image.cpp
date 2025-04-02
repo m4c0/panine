@@ -7,6 +7,7 @@ module cmd;
 import breakimg;
 import dotz;
 import hai;
+import jute;
 import mtime;
 
 namespace {
@@ -28,8 +29,8 @@ void cmd::image(jute::view line) {
 static void zoom_out(ots & ots, jute::view line) {
   auto [file, r0] = line.split(',');
   auto [vol, sk] = r0.split(',');
-  auto volume = atof(vol);
-  auto skip = atoi(sk);
+  auto volume = jute::to_f(vol);
+  auto skip = jute::to_u32(sk);
 
   auto [vfile, afile] = file.split('+');
   if (afile == "") afile = vfile;
