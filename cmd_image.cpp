@@ -9,6 +9,7 @@ import dotz;
 import hai;
 import jute;
 import mtime;
+import silog;
 
 namespace {
   struct img {
@@ -37,7 +38,9 @@ static void zoom_out(ots & ots, jute::view line) {
 
   auto img = ("out/assets/" + vfile + ".jpg").cstr();
   if (!mtime::of(img.begin())) img = ("out/assets/" + vfile + ".png").cstr();
+  if (!mtime::of(img.begin())) silog::die("missing file: %s", img.begin());
   auto m4a = ("out/assets/" + afile + ".m4a").cstr();
+  if (!mtime::of(m4a.begin())) silog::die("missing file: %s", m4a.begin());
   silog::log(silog::info, "rendering intermission with image [%s] and audio [%s]", img.begin(), m4a.begin());
 
   breakimg b { img.begin(), *ots.dq(), ots.render_pass() };
