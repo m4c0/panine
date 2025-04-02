@@ -64,8 +64,8 @@ static void zoom_out(ots & ots, jute::view line) {
 void cmd::zoom_out(ots & ots, jute::view line) {
   line = line.subview(1).after;
 
-  for (auto &[name, line]: g_imgs) 
-    if (name == line) return ::zoom_out(ots, *line);
+  for (auto &[name, val]: g_imgs) 
+    if (name == line) return ::zoom_out(ots, *val);
 
   ::zoom_out(ots, line);
 }
