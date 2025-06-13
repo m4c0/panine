@@ -38,8 +38,10 @@ public:
     : m_dset_scriber { dset_scriber }
     , m_dset_chars { dset_chars }
     , m_pl { vee::create_pipeline_layout({
-        *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
-        *vee::create_descriptor_set_layout({ vee::dsl_fragment_storage() }),
+        .descriptor_set_layouts {{
+          *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
+          *vee::create_descriptor_set_layout({ vee::dsl_fragment_storage() }),
+        }}
       }) }
     , m_gp { vee::create_graphics_pipeline({
         .pipeline_layout = *m_pl,
@@ -70,8 +72,9 @@ public:
         vee::image_view::type in, 
         vee::render_pass::type rp)
     : m_pl { vee::create_pipeline_layout(
-      { *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }) },
-      { vee::fragment_push_constant_range<upc>() }) }
+      *vee::create_descriptor_set_layout({ vee::dsl_fragment_sampler() }),
+      vee::fragment_push_constant_range<upc>()
+    ) }
     , m_gp { vee::create_graphics_pipeline({
         .pipeline_layout = *m_pl,
         .render_pass = rp,

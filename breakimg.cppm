@@ -28,8 +28,8 @@ public:
       vee::combined_image_sampler(1),
     }
     , m_pl { vee::create_pipeline_layout(
-      { m_dset.descriptor_set_layout() },
-      { vee::vertex_push_constant_range<upc>() }
+      m_dset.descriptor_set_layout(),
+      vee::vertex_push_constant_range<upc>()
     ) }
     , m_oqr { "breakimg", dq.physical_device(), rp, *m_pl }
   {
