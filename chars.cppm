@@ -31,7 +31,7 @@ export class chars {
 
 public:
   explicit chars(const voo::device_and_queue & dq)
-    : m_chrs { dq.physical_device(), vee::create_buffer(sizeof(chr) * max_chars, vee::buffer_usage::storage_buffer) } {
+    : m_chrs { dq.physical_device(), sizeof(chr) * max_chars, vee::buffer_usage::storage_buffer } {
     vee::update_descriptor_set(m_dset.descriptor_set(), 0, m_chrs.buffer());
   }
     
